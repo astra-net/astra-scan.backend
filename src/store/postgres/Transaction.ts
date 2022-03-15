@@ -1,16 +1,15 @@
 import {IStorageTransaction} from 'src/store/interface'
+import {buildSQLQuery} from 'src/store/postgres/filters'
+import {fromSnakeToCamelResponse, generateQuery} from 'src/store/postgres/queryMapper'
+import {Query} from 'src/store/postgres/types'
 import {
+  Filter,
+  RPCTransactionAstra,
+  Transaction,
   TransactionQueryField,
   TransactionQueryValue,
-  RPCTransactionHarmony,
-  Transaction,
-  Filter,
 } from 'src/types'
 import {arrayChunk, defaultChunkSize} from 'src/utils/arrayChunk'
-
-import {Query} from 'src/store/postgres/types'
-import {fromSnakeToCamelResponse, generateQuery} from 'src/store/postgres/queryMapper'
-import {buildSQLQuery} from 'src/store/postgres/filters'
 
 export class PostgresStorageTransaction implements IStorageTransaction {
   query: Query
@@ -19,18 +18,18 @@ export class PostgresStorageTransaction implements IStorageTransaction {
     this.query = query
   }
 
-  addTransactions = async (txs: RPCTransactionHarmony[]) => {
+  addTransactions = async (txs: RPCTransactionAstra[]) => {
     const chunks = arrayChunk(txs, defaultChunkSize)
     for (const chunk of chunks) {
       await Promise.all(chunk.map((tx: any) => this.addTransaction(tx)))
     }
   }
 
-  addTransaction = async (tx: RPCTransactionHarmony) => {
+  addTransaction = async (tx: RPCTransactionAstra) => {
     const newTx = {
       ...tx,
       hash: tx.ethHash,
-      hash_harmony: tx.hash,
+      hash_astra: tx.hash,
       ethHash: undefined,
       blockNumber: BigInt(tx.blockNumber).toString(),
       value: BigInt(tx.value).toString(),

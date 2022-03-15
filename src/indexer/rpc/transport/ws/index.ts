@@ -1,7 +1,7 @@
-import {WebSocketRPC} from './WebSocketRPC'
-import {RPCETHMethod, RPCHarmonyMethod, ShardID} from 'src/types/blockchain'
 import {config} from 'src/config'
-import {urls, RPCUrls} from 'src/indexer/rpc/RPCUrls'
+import {RPCUrls} from 'src/indexer/rpc/RPCUrls'
+import {RPCAstraMethod, RPCETHMethod, ShardID} from 'src/types/blockchain'
+import {WebSocketRPC} from './WebSocketRPC'
 
 const lazyConnection = (shardID: ShardID, url: string) => {
   let connection: WebSocketRPC | null = null
@@ -25,7 +25,7 @@ const getConnectionIndex = (shardID: ShardID) => {
 
 export const WSTransport = (
   shardID: ShardID,
-  method: RPCETHMethod | RPCHarmonyMethod,
+  method: RPCETHMethod | RPCAstraMethod,
   params: any[]
 ) => {
   const c = connections[shardID][getConnectionIndex(shardID)]

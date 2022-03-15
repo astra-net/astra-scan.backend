@@ -7,7 +7,7 @@ export const getGitCommitHash = () => {
     const output = execSync(`git rev-parse HEAD`)
     hash = output.toString().split('\n')[0]
     return hash
-  } catch (err) {
+  } catch (err: any) {
     return 'Unset'
   }
 }

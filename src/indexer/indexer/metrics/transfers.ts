@@ -1,17 +1,15 @@
-import {
-  Address,
-  InternalTransaction,
-  RPCTransaction,
-  Block,
-  RPCStakingTransactionHarmony,
-  Filter,
-} from 'src/types'
-import {normalizeAddress} from 'src/utils/normalizeAddress'
 import * as RPCClient from 'src/indexer/rpc/client'
 import {logger} from 'src/logger'
+import {
+  Address,
+  Block,
+  InternalTransaction,
+  RPCStakingTransactionAstra,
+  RPCTransaction,
+} from 'src/types'
+import {normalizeAddress} from 'src/utils/normalizeAddress'
 
 const l = logger(module)
-import {stores} from 'src/store'
 
 const undelegateThresholdONE = 100000n * 10n ** 18n
 const transferThresholdONE = 10000n * 10n ** 18n
@@ -39,7 +37,7 @@ const addAddress = async (
   }
 
   const balance = await RPCClient.getBalance(0, address)
-  if (BigInt(balance) < balanceThresholdONE) {
+  if (BigInt(String(balance)) < balanceThresholdONE) {
     return
   }
 
@@ -54,7 +52,7 @@ const addAddress = async (
     type,
     blockNumber,
     transactionHash,
-    balance: BigInt(balance).toString(),
+    balance: BigInt(String(balance)).toString(),
     sentTxCount,
   }
 
@@ -71,7 +69,7 @@ export const addInternalTransaction = (internalTransaction: InternalTransaction,
 
     const address = internalTransaction.to
     addAddress(address, value, 'internal', +block.number, internalTransaction.transactionHash)
-  } catch (err) {
+  } catch (err: any) {
     l.error(err)
   }
 }
@@ -85,12 +83,12 @@ export const addTransaction = (transaction: RPCTransaction) => {
 
     const address = transaction.to
     addAddress(address, value, 'transaction', +transaction.blockNumber, transaction.hash)
-  } catch (err) {
+  } catch (err: any) {
     l.error(err)
   }
 }
 
-export const addStakingTransaction = (stakingTransaction: RPCStakingTransactionHarmony) => {
+export const addStakingTransaction = (stakingTransaction: RPCStakingTransactionAstra) => {
   try {
     if (stakingTransaction.type !== 'Undelegate') {
       return
@@ -104,7 +102,7 @@ export const addStakingTransaction = (stakingTransaction: RPCStakingTransactionH
 
     const address = normalizeAddress(stakingTransaction.msg.delegatorAddress)
     addAddress(address!, value, 'staking', +stakingTransaction.blockNumber, stakingTransaction.hash)
-  } catch (err) {
+  } catch (err: any) {
     l.error(err)
   }
 }
@@ -120,7 +118,7 @@ const removeOldEntries = () => {
   const limit = entries.size - maxEntries
 
   let i = 0
-  for (let k of entries.keys()) {
+  for (const k of entries.keys()) {
     if (i++ > limit) {
       break
     }

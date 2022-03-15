@@ -38,7 +38,7 @@ export const addContract = async (store: PostgresStorage, contract: Contract) =>
       name: () => isLength(params.name, {min: 3, max: 64}),
       symbol: () => isLength(params.symbol, {min: 3, max: 10}),
     })
-  } catch (err) {
+  } catch (err: any) {
     l.debug(`Failed to get contract ${contract.address} info`, err.message || err)
     return
   }

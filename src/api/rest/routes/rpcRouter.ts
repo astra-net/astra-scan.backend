@@ -1,4 +1,4 @@
-import {Response, Request, Router, NextFunction} from 'express'
+import {NextFunction, Request, Response, Router} from 'express'
 import * as controllers from 'src/api/controllers'
 import {catchAsync} from 'src/api/rest/utils'
 import {EthGetLogParams} from 'src/types'
@@ -7,7 +7,7 @@ export const rpcRouter = Router({mergeParams: true})
 
 enum RPCMethod {
   ethGetLogs = 'eth_getLogs',
-  hmyGetLogs = 'hmy_getLogs',
+  astraGetLogs = 'astra_getLogs',
 }
 
 enum RPCErrorCode {
@@ -40,7 +40,7 @@ export async function postRpcRequest(req: Request, res: Response, next: NextFunc
   try {
     switch (method) {
       case RPCMethod.ethGetLogs:
-      case RPCMethod.hmyGetLogs: {
+      case RPCMethod.astraGetLogs: {
         const data = await ethGetLogs(params[0])
         res.send(wrapRpcResponse('result', data))
         break
@@ -54,7 +54,7 @@ export async function postRpcRequest(req: Request, res: Response, next: NextFunc
         )
       }
     }
-  } catch (e) {
+  } catch (e: any) {
     res.send(wrapRpcResponse('error', {message: e.message || 'Unknown error'}))
   }
 }

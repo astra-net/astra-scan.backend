@@ -1,7 +1,7 @@
+import nodeFetch from 'node-fetch'
+import {withCache} from 'src/api/controllers/cache'
 import {storesAPI as stores} from 'src/store'
 import {Address} from 'src/types/blockchain'
-import {withCache} from 'src/api/controllers/cache'
-import nodeFetch from 'node-fetch'
 
 export async function oneWalletGetMetrics(): Promise<any> {
   const addressList = await withCache(
@@ -29,7 +29,7 @@ const getTotalAmount = async (addressList: Address[]) => {
     const body = {
       jsonrpc: '2.0',
       id: 1,
-      method: 'hmy_getBalance',
+      method: 'astra_getBalance',
       params: [address, 'latest'],
     }
 

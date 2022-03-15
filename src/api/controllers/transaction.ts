@@ -1,20 +1,19 @@
 import {storesAPI as stores} from 'src/store'
+import {Filter, TransactionQueryField, TransactionQueryValue} from 'src/types/api'
 import {ShardID, Transaction} from 'src/types/blockchain'
-import {validator} from 'src/utils/validators/validators'
 import {
   is64CharHexHash,
   isBlockNumber,
-  isOrderDirection,
-  isOrderBy,
-  isShard,
-  isOffset,
-  isLimit,
-  isOneOf,
   isFilters,
-  isAddress,
+  isLimit,
+  isOffset,
+  isOneOf,
+  isOrderBy,
+  isOrderDirection,
+  isShard,
 } from 'src/utils/validators'
-import {Filter, TransactionQueryField, TransactionQueryValue} from 'src/types/api'
-import {cache, withCache} from './cache'
+import {validator} from 'src/utils/validators/validators'
+import {withCache} from './cache'
 
 export async function getTransactionByField(
   shardID: ShardID,
@@ -22,7 +21,7 @@ export async function getTransactionByField(
   value: TransactionQueryValue
 ): Promise<Transaction | Transaction[] | null> {
   validator({
-    field: isOneOf(field, ['block_number', 'block_hash', 'hash', 'hash_harmony']),
+    field: isOneOf(field, ['block_number', 'block_hash', 'hash', 'hash_astra']),
   })
   if (field === 'block_number') {
     validator({
@@ -40,14 +39,14 @@ export async function getTransactionByField(
 
   if (!txs!.length) {
     if (field === 'hash') {
-      // if tx not found by hash, give it another shot with harmony hash
-      return getTransactionByField(shardID, 'hash_harmony', value)
+      // if tx not found by hash, give it another shot with astra hash
+      return getTransactionByField(shardID, 'hash_astra', value)
     }
 
     return null
   }
 
-  if (['hash', 'hash_harmony'].includes(field)) {
+  if (['hash', 'hash_astra'].includes(field)) {
     return txs![0]
   }
 

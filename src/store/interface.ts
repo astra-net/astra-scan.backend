@@ -1,30 +1,26 @@
 import {
-  ShardID,
-  Block,
-  Log,
-  TransactionHash,
-  BlockNumber,
-  BlockHash,
-  RPCTransactionHarmony,
-  RPCStakingTransactionHarmony,
-  Transaction,
-  StakingTransaction,
+  Filter,
+  InternalTransactionQueryField,
+  StakingTransactionQueryField,
+  TransactionQueryField,
+  TransactionQueryValue,
+} from 'src/types'
+import {
   Address2Transaction,
-  InternalTransaction,
+  Block,
+  BlockHash,
+  BlockNumber,
   Contract,
   IERC20,
   IERC721,
-  IERC1155,
+  InternalTransaction,
+  Log,
+  RPCStakingTransactionAstra,
+  RPCTransactionAstra,
+  StakingTransaction,
+  Transaction,
+  TransactionHash,
 } from 'src/types/blockchain'
-import {
-  Filter,
-  TransactionQueryField,
-  TransactionQueryValue,
-  StakingTransactionQueryField,
-  InternalTransactionQueryField,
-} from 'src/types'
-import {fromSnakeToCamelResponse, generateQuery} from 'src/store/postgres/queryMapper'
-import {buildSQLQuery} from 'src/store/postgres/filters'
 
 export interface IStorageBlock {
   addBlock: (block: Block) => Promise<any>
@@ -51,8 +47,8 @@ export interface IStorageIndexer {
 }
 
 export interface IStorageTransaction {
-  addTransaction: (block: RPCTransactionHarmony) => Promise<any>
-  addTransactions: (blocks: RPCTransactionHarmony[]) => Promise<any>
+  addTransaction: (block: RPCTransactionAstra) => Promise<any>
+  addTransactions: (blocks: RPCTransactionAstra[]) => Promise<any>
   getTransactionsByField: (
     field: TransactionQueryField,
     value: TransactionQueryValue
@@ -66,8 +62,8 @@ export interface IStorageContract {
 }
 
 export interface IStorageStakingTransaction {
-  addStakingTransaction: (block: RPCStakingTransactionHarmony) => Promise<any>
-  addStakingTransactions: (blocks: RPCStakingTransactionHarmony[]) => Promise<any>
+  addStakingTransaction: (block: RPCStakingTransactionAstra) => Promise<any>
+  addStakingTransactions: (blocks: RPCStakingTransactionAstra[]) => Promise<any>
   getStakingTransactionsByField: (
     field: StakingTransactionQueryField,
     value: TransactionQueryValue

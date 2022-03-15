@@ -115,7 +115,7 @@ export class ContractIndexer {
           if (latestSyncedTokenBlock > 0) {
             await task.trackEvents.setLastSyncedBlock(this.store, token, latestSyncedTokenBlock)
           }
-        } catch (err) {
+        } catch (err: any) {
           this.ls[task.name].warn(`Syncing logs for ${token.address} failed`, {
             token,
             err: err.message || err,
@@ -147,7 +147,7 @@ export class ContractIndexer {
         if (typeof task.onFinish === 'function') {
           await task.onFinish(this.store)
         }
-      } catch (err) {
+      } catch (err: any) {
         l.warn('Batch failed', err.message || err)
       }
     }

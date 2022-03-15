@@ -7,15 +7,15 @@ export type RPCETHMethod =
   | 'eth_chainId'
   | 'eth_getCode'
 
-export type RPCHarmonyMethod =
-  | 'hmy_getBlockByNumber'
-  | 'hmy_getTransactionByHash'
-  | 'hmy_getBlocks'
-  | 'hmy_call'
+export type RPCAstraMethod =
+  | 'astra_getBlockByNumber'
+  | 'astra_getTransactionByHash'
+  | 'astra_getBlocks'
+  | 'astra_call'
   | 'debug_traceTransaction'
-  | 'hmyv2_getTransactionReceipt'
-  | 'hmy_getBalance'
-  | 'hmyv2_getTransactionsCount'
+  | 'astrav2_getTransactionReceipt'
+  | 'astra_getBalance'
+  | 'astrav2_getTransactionsCount'
 
 export type ShardID = 0 | 1 | 2 | 3
 
@@ -48,7 +48,7 @@ export type RPCBlock = {
 
 export type LogsBloom = string
 
-export type RPCBlockHarmony = {
+export type RPCBlockAstra = {
   difficulty: string
   extraData: string
   gasLimit: string
@@ -65,8 +65,8 @@ export type RPCBlockHarmony = {
   size: string
   stateRoot: string
   timestamp: string
-  transactions: RPCTransactionHarmony[]
-  stakingTransactions: RPCStakingTransactionHarmony[]
+  transactions: RPCTransactionAstra[]
+  stakingTransactions: RPCStakingTransactionAstra[]
   transactionsRoot: string
   uncles: string[]
   epoch: string
@@ -76,7 +76,7 @@ export type RPCBlockHarmony = {
 type Modify<T, R> = Omit<T, keyof R> & R
 
 export type Block = Modify<
-  RPCBlockHarmony,
+  RPCBlockAstra,
   {
     number: BlockNumber
     epoch: number
@@ -89,10 +89,10 @@ export type Block = Modify<
 >
 
 export type Address = string
-export type AddressHarmony = string
+export type AddressAstra = string
 
 export type TransactionHash = string
-export type TransactionHarmonyHash = string
+export type TransactionAstraHash = string
 
 export type RPCTransaction = {
   blockHash: BlockHash
@@ -122,14 +122,14 @@ export type TransactionReceipt = RPCTransaction & {
   ]
 }
 
-export type RPCTransactionHarmony = {
+export type RPCTransactionAstra = {
   blockHash: BlockHash
   blockNumber: BlockHexNumber
-  from: AddressHarmony
-  to: AddressHarmony
+  from: AddressAstra
+  to: AddressAstra
   gas: string
   gasPrice: string
-  hash: TransactionHarmonyHash
+  hash: TransactionAstraHash
   ethHash: TransactionHash
   input: ByteCode
   nonce: string
@@ -149,15 +149,15 @@ export type StakingTransactionType =
   | 'Undelegate'
   | 'Delegate'
 
-export type RPCStakingTransactionHarmony = {
+export type RPCStakingTransactionAstra = {
   type: StakingTransactionType
   blockHash: BlockHash
   blockNumber: BlockHexNumber
-  from: AddressHarmony
-  to: AddressHarmony
+  from: AddressAstra
+  to: AddressAstra
   gas: string
   gasPrice: string
-  hash: TransactionHarmonyHash
+  hash: TransactionAstraHash
   input: ByteCode
   nonce: string
   r: string
@@ -171,7 +171,7 @@ export type RPCStakingTransactionHarmony = {
 }
 
 // todo
-export type StakingTransaction = RPCStakingTransactionHarmony
+export type StakingTransaction = RPCStakingTransactionAstra
 
 export type Topic = string
 export type ByteCode = string
@@ -262,7 +262,7 @@ export type InternalTransaction = {
 }
 
 export type Transaction = {
-  harmony: RPCTransactionHarmony
+  astra: RPCTransactionAstra
   eth: RPCTransaction
 }
 
@@ -275,7 +275,7 @@ export type AddressTransactionType =
 
 export type Address2Transaction = {
   blockNumber: BlockNumber
-  transactionHash: TransactionHash | TransactionHarmonyHash
+  transactionHash: TransactionHash | TransactionAstraHash
   address: Address
   transactionType: AddressTransactionType
 }
@@ -353,7 +353,7 @@ export type IERC1155 = {
     name: 'ROTTENSWAP ONE DROP',
     type: '1155',
     symbol: 'VINCI',
-    description: 'The most based drop to ever exist on Harmony.',
+    description: 'The most based drop to ever exist on Astra.',
     image: 'QmWSqePh8XnUM3xcrvTg4dYvcuCXHwNuvWFnsSVGHXZQgc',
     external_link: ''
   }

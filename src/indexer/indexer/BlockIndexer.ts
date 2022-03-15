@@ -1,17 +1,16 @@
-import * as RPCClient from 'src/indexer/rpc/client'
-import {urls, RPCUrls} from 'src/indexer/rpc/RPCUrls'
-import {ShardID, Block, BlockNumber} from 'src/types/blockchain'
-import {arrayChunk, defaultChunkSize} from 'src/utils/arrayChunk'
-import {logger} from 'src/logger'
-import LoggerModule from 'zerg/dist/LoggerModule'
-import {stores} from 'src/store'
-import {logTime} from 'src/utils/logTime'
-import {PostgresStorage} from 'src/store/postgres'
-import {AddressIndexer} from './addressIndexer'
-import {contractAddressIndexer} from './сontractAddressIndexer'
-import {config} from 'src/config'
-import {internalTransactionsIgnoreListFilter} from './ignoreList/internalTransactionIgnoreList'
-import * as monitorTransfers from './metrics/transfers'
+import { config } from 'src/config';
+import * as RPCClient from 'src/indexer/rpc/client';
+import { RPCUrls, urls } from 'src/indexer/rpc/RPCUrls';
+import { logger } from 'src/logger';
+import { stores } from 'src/store';
+import { PostgresStorage } from 'src/store/postgres';
+import { Block, BlockNumber, ShardID } from 'src/types/blockchain';
+import { arrayChunk, defaultChunkSize } from 'src/utils/arrayChunk';
+import { logTime } from 'src/utils/logTime';
+import LoggerModule from 'zerg/dist/LoggerModule';
+import { AddressIndexer } from './addressIndexer';
+import { internalTransactionsIgnoreListFilter } from './ignoreList/internalTransactionIgnoreList';
+import { contractAddressIndexer } from './сontractAddressIndexer';
 
 const approximateBlockMintingTime = 2000
 const maxBatchCount = 100
@@ -266,7 +265,7 @@ export class BlockIndexer {
         this.decreaseBatchCount()
         setTimeout(this.loop, approximateBlockMintingTime)
       }
-    } catch (err) {
+    } catch (err: any) {
       this.l.warn(`Batch failed. Retrying in ${approximateBlockMintingTime}ms`, err.message || err)
       this.decreaseBatchCount()
       setTimeout(this.loop, approximateBlockMintingTime)

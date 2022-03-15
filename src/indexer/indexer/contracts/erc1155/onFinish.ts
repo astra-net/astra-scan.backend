@@ -1,10 +1,8 @@
-import {PostgresStorage} from 'src/store/postgres'
-import {ABI} from 'src/indexer/indexer/contracts/erc1155/ABI'
-import {logger} from 'src/logger'
-import {Address, Filter, IERC20, IERC721TokenID} from 'src/types'
-import nodeFetch from 'node-fetch'
-import {normalizeAddress} from 'src/utils/normalizeAddress'
-import {getByIPFSHash} from 'src/indexer/utils/ipfs/index'
+import { ABI } from 'src/indexer/indexer/contracts/erc1155/ABI';
+import { getByIPFSHash } from 'src/indexer/utils/ipfs/index';
+import { logger } from 'src/logger';
+import { PostgresStorage } from 'src/store/postgres';
+import { Address, Filter, IERC721TokenID } from 'src/types';
 
 const l = logger(module, 'erc1155:assets')
 const {call} = ABI
@@ -57,7 +55,7 @@ export const updateAssets = async (store: PostgresStorage) => {
         try {
           // todo validate size
           meta = await getByIPFSHash(uri)
-        } catch (e) {
+        } catch (e: any) {
           l.debug(`Failed to fetch meta from ${uri} for token ${tokenAddress} ${tokenID}`)
         }
 

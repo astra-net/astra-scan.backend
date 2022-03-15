@@ -221,7 +221,7 @@ const startMigration = async () => {
       await sleep(SUCCESS_SLEEP_TIMEOUT)
 
       increaseBlocksNumber()
-    } catch (e) {
+    } catch (e: any) {
       l.error(`Migration error: ${e.message}, sleep`)
       process.exit(1)
       // await sleep(FAIL_SLEEP_TIMEOUT)

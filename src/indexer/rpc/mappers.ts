@@ -1,28 +1,22 @@
 import {
-  Address,
   Block,
-  BlockHash,
   BlockNumber,
-  ByteCode,
   InternalTransaction,
-  RPCBlockHarmony,
+  RPCBlockAstra,
   RPCInternalTransactionFromBlockTrace,
-  RPCStakingTransactionHarmony,
-  RPCTransactionHarmony,
-  TraceCallErrorToRevert,
-  TraceCallTypes,
-  TransactionHash,
+  RPCStakingTransactionAstra,
+  RPCTransactionAstra,
 } from 'src/types'
 import {normalizeAddress} from 'src/utils/normalizeAddress'
 
-export const mapBlockFromResponse = (block: RPCBlockHarmony): Block => {
+export const mapBlockFromResponse = (block: RPCBlockAstra): Block => {
   // removing redundant fields for legacy blocks
   /*
   curl --location --request POST 'https://api.s0.b.hmny.io' \
   --header 'Content-Type: application/json' \
   --data-raw '{
   "jsonrpc": "2.0",
-    "method": "hmy_getBlockByNumber",
+    "method": "astra_getBlockByNumber",
     "id": 1,
     "params": [0, false]
   }'
@@ -44,7 +38,7 @@ export const mapBlockFromResponse = (block: RPCBlockHarmony): Block => {
   } as Block
 }
 
-const mapTransaction = (tx: RPCTransactionHarmony) => {
+const mapTransaction = (tx: RPCTransactionAstra) => {
   return {
     ...tx,
     to: normalizeAddress(tx.to),
@@ -52,9 +46,9 @@ const mapTransaction = (tx: RPCTransactionHarmony) => {
   }
 }
 
-const mapStakingTransaction = (tx: RPCStakingTransactionHarmony) => {
+const mapStakingTransaction = (tx: RPCStakingTransactionAstra) => {
   // convert one1 to 0x
-  // https://docs.harmony.one/home/developers/api/methods/transaction-related-methods/hmy_getstakingtransactionbyblockhashandindex
+  // https://docs.astranetwork.com/home/developers/api/methods/transaction-related-methods/astra_getstakingtransactionbyblockhashandindex
   const msg = {...tx.msg}
   if (msg.validatorAddress) {
     msg.validatorAddress = normalizeAddress(msg.validatorAddress)

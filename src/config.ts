@@ -13,7 +13,7 @@ let VERSIONFileData: String
 
 try {
   VERSIONFileData = `${fs.readFileSync(path.join(__dirname, '../', './VERSION'))}`
-} catch (e) {
+} catch (e:any) {
   VERSIONFileData = 'Unset'
 }
 
@@ -67,7 +67,7 @@ export const config = {
     },
     rest: {
       isEnabled: toBool(process.env.API_REST_IS_ENABLED || '0'),
-      port: +(process.env.API_REST_PORT || 3000),
+      port: +(process.env.API_REST_PORT || 3004),
     },
     // JSON RPC endpoint available on POST /v0/rpc. Requires API_REST_IS_ENABLED=1
     json_rpc: {

@@ -1,7 +1,7 @@
-# Harmony Blockchain Data Indexer
+# Astra Blockchain Data Indexer
 
 Indexer scrapes blocks, transactions (staking, call traces, logs), tracks contracts, ERC20 (aka HRC20) and ERC721 (aka HRC721) operations and balances
-from Harmony blockchain and writes to postgres db.
+from Astra blockchain and writes to postgres db.
 
 API serves REST/JSON and websocket. Also, here is initial draft for GRPC. Will be implemented fully on community demand.
 
@@ -58,7 +58,7 @@ Approximate count
 list (with filters)
 `/v0/shard/0/transaction`
 
-by ETH hash or Harmony hash
+by ETH hash or Astra hash
 `/v0/shard/0/transaction/hash/:hash`
 
 by block number
@@ -75,7 +75,7 @@ Approximate count
 list (with filters)
 `/v0/shard/0/stakingTransaction`
 
-by Harmony hash
+by Astra hash
 `/v0/shard/0/stakingTransaction/hash/:txHash`
 
 by block number

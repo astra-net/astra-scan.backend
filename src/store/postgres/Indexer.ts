@@ -1,7 +1,7 @@
-import {IStorageIndexer} from 'src/store/interface'
-import {BlockNumber} from 'src/types/blockchain'
+import { IStorageIndexer } from 'src/store/interface';
+import { Query } from 'src/store/postgres/types';
+import { BlockNumber } from 'src/types/blockchain';
 
-import {Query} from 'src/store/postgres/types'
 
 export class PostgresStorageIndexer implements IStorageIndexer {
   query: Query
@@ -35,8 +35,8 @@ export class PostgresStorageIndexer implements IStorageIndexer {
       `select last_synced_block_number from indexer_state where indexer_name='blocks';`,
       []
     )
-    const lastIndexedBlock = +res[0][`last_synced_block_number`]
-    return lastIndexedBlock || 0
+    const lastIndexedBlock = res[0] ? +res[0][`last_synced_block_number`] : 0
+    return lastIndexedBlock
   }
 
   setLastIndexedBlockNumber = async (num: BlockNumber): Promise<number> => {
@@ -52,8 +52,8 @@ export class PostgresStorageIndexer implements IStorageIndexer {
       []
     )
 
-    const lastIndexedBlock = +res[0][`last_synced_block_number`]
-    return lastIndexedBlock || 0
+    const lastIndexedBlock = res[0] ? +res[0][`last_synced_block_number`] : 0
+    return lastIndexedBlock
   }
 
   setLastIndexedLogsBlockNumber = async (num: BlockNumber): Promise<number> => {
@@ -69,7 +69,7 @@ export class PostgresStorageIndexer implements IStorageIndexer {
       [name]
     )
 
-    const lastIndexedBlock = +res[0][`last_synced_block_number`]
+    const lastIndexedBlock = res[0] ? +res[0][`last_synced_block_number`] : 0
     return lastIndexedBlock || 0
   }
 

@@ -73,7 +73,7 @@ export const validator = (validators: Record<string, ParamValidator | ParamValid
   const run = (f: ParamValidator, key: string) => {
     try {
       f()
-    } catch (error) {
+    } catch (error: any) {
       errors.push({error, key})
     }
   }

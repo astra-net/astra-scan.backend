@@ -1,12 +1,11 @@
-import {Log, IERC721, ContractEventType, ContractEvent} from 'src/types'
-import {PostgresStorage} from 'src/store/postgres'
-import {ABI} from './ABI'
-import {logger} from 'src/logger'
+import { zeroAddress } from 'src/indexer/indexer/contracts/utils/zeroAddress';
+import { logger } from 'src/logger';
+import { PostgresStorage } from 'src/store/postgres';
+import { ContractEvent, ContractEventType, IERC721, Log } from 'src/types';
+import { normalizeAddress } from 'src/utils/normalizeAddress';
+import { ABI } from './ABI';
 
 const {getEntryByName, decodeLog, call} = ABI
-import {zeroAddress} from 'src/indexer/indexer/contracts/utils/zeroAddress'
-import {normalizeAddress} from 'src/utils/normalizeAddress'
-import {logTime} from 'src/utils/logTime'
 
 const l = logger(module, 'erc721')
 

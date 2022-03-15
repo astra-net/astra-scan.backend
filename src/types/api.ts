@@ -11,7 +11,7 @@ export type FilterProperty =
   | 'transaction_type'
   | 'timestamp'
 
-export type TransactionQueryField = 'block_number' | 'block_hash' | 'hash' | 'hash_harmony'
+export type TransactionQueryField = 'block_number' | 'block_hash' | 'hash' | 'hash_astra'
 export type StakingTransactionQueryField = 'block_number' | 'block_hash' | 'hash'
 export type InternalTransactionQueryField =
   | 'block_number'

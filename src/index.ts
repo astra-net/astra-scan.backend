@@ -1,12 +1,12 @@
-import {logger} from './logger'
 import {config, init as configInit} from 'src/config'
+import {logger} from './logger'
 
 // import {run as eventSignaturesRun} from 'src/indexer/indexer/contracts/eventSignatures/eventSignatures'
 
 const l = logger(module)
 
 const run = async () => {
-  l.info(`Harmony Explorer v${config.info.version}. Git commit hash: ${config.info.gitCommitHash}`)
+  l.info(`Astra Explorer v${config.info.version}. Git commit hash: ${config.info.gitCommitHash}`)
   // eventSignaturesRun()
   await configInit()
 
@@ -24,7 +24,7 @@ const run = async () => {
     } else {
       l.debug('Indexer is disabled')
     }
-  } catch (err) {
+  } catch (err: any) {
     l.error(err)
     l.error(err.stack)
     process.exit(1)

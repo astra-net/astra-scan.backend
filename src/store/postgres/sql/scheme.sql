@@ -57,7 +57,7 @@ create table if not exists transactions
 (
     shard             smallint                          not null,
     hash              char(66) unique primary key       not null,
-    hash_harmony      char(66) unique                   not null,
+    hash_astra      char(66) unique                   not null,
     value             numeric,
     block_hash        char(66) references blocks (hash) not null,
     block_number      bigint references blocks (number) not null,
@@ -77,7 +77,7 @@ create table if not exists transactions
     error             text
 );
 create index if not exists idx_transactions_hash on transactions using hash (hash);
-create index if not exists idx_transactions_hash_harmony on transactions using hash (hash_harmony);
+create index if not exists idx_transactions_hash_astra on transactions using hash (hash_astra);
 -- create index if not exists idx_transactions_block_hash on transactions using hash (block_hash);
 create index if not exists idx_transactions_block_number on transactions (block_number desc);
 create index if not exists idx_transactions_timestamp on transactions (timestamp);
@@ -119,7 +119,7 @@ create table if not exists staking_transactions
     v                 text,
     msg               jsonb,
     type              staking_transaction_type,
-    /* amount from msg.amount or if type=CollectRewards from hmyv2_getTransactionReceipt tx.logs[0].data */
+    /* amount from msg.amount or if type=CollectRewards from astrav2_getTransactionReceipt tx.logs[0].data */
     amount            numeric
 );
 

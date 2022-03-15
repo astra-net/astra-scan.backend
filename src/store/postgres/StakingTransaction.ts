@@ -1,10 +1,9 @@
 import {IStorageStakingTransaction} from 'src/store/interface'
-import {StakingTransaction, ShardID, RPCStakingTransactionHarmony} from 'src/types/blockchain'
-
-import {Query} from 'src/store/postgres/types'
-import {fromSnakeToCamelResponse, generateQuery} from 'src/store/postgres/queryMapper'
-import {Filter, StakingTransactionQueryField, TransactionQueryValue} from 'src/types'
 import {buildSQLQuery} from 'src/store/postgres/filters'
+import {fromSnakeToCamelResponse, generateQuery} from 'src/store/postgres/queryMapper'
+import {Query} from 'src/store/postgres/types'
+import {Filter, StakingTransactionQueryField, TransactionQueryValue} from 'src/types'
+import {RPCStakingTransactionAstra, ShardID, StakingTransaction} from 'src/types/blockchain'
 
 export class PostgresStorageStakingTransaction implements IStorageStakingTransaction {
   query: Query
@@ -14,11 +13,11 @@ export class PostgresStorageStakingTransaction implements IStorageStakingTransac
     this.shardID = shardID
   }
 
-  addStakingTransactions = async (txs: RPCStakingTransactionHarmony[]) => {
+  addStakingTransactions = async (txs: RPCStakingTransactionAstra[]) => {
     return Promise.all(txs.map((t) => this.addStakingTransaction(t)))
   }
 
-  addStakingTransaction = async (tx: RPCStakingTransactionHarmony) => {
+  addStakingTransaction = async (tx: RPCStakingTransactionAstra) => {
     const newTx = {
       ...tx,
       shard: this.shardID,

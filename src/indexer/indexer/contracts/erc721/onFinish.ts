@@ -46,7 +46,7 @@ export const onFinish = async (store: PostgresStorage) => {
         try {
           // todo validate size
           meta = await nodeFetch(uri).then((r) => r.json())
-        } catch (e) {
+        } catch (e: any) {
           // l.warn(`Failed to fetch meta from ${uri} for token ${tokenAddress} ${tokenID}`)
         }
       } else {

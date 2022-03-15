@@ -1,27 +1,26 @@
-import express, {Router} from 'express'
-import compression from 'compression'
-import {config} from 'src/config'
-import http, {Server} from 'http'
 import bodyParser from 'body-parser'
+import compression from 'compression'
 import cors from 'cors'
-import {logger} from 'src/logger'
-import {blockRouter} from 'src/api/rest/routes/block'
-import {transactionRouter} from 'src/api/rest/routes/transaction'
-import {stakingTransactionRouter} from 'src/api/rest/routes/stakingTransaction'
+import express, {Router} from 'express'
+import http, {Server} from 'http'
 import {addressRouter} from 'src/api/rest/routes/address'
-import {internalTransactionRouter} from 'src/api/rest/routes/internalTransaction'
-import {signatureRouter} from 'src/api/rest/routes/signature'
-import {logsRouter} from 'src/api/rest/routes/logs'
-import {priceRouter} from 'src/api/rest/routes/price'
-import {metricsRouter} from 'src/api/rest/routes/metrics'
+import {blockRouter} from 'src/api/rest/routes/block'
+import {erc1155Router} from 'src/api/rest/routes/ERC1155'
 import {erc20Router} from 'src/api/rest/routes/ERC20'
 import {erc721Router} from 'src/api/rest/routes/ERC721'
-import {erc1155Router} from 'src/api/rest/routes/ERC1155'
+import {internalTransactionRouter} from 'src/api/rest/routes/internalTransaction'
+import {logsRouter} from 'src/api/rest/routes/logs'
+import {metricsRouter} from 'src/api/rest/routes/metrics'
 import {oneWalletMetricsRouter} from 'src/api/rest/routes/oneWalletMetrics'
-import {warmUpCache} from 'src/api/controllers/cache/warmUpCache'
+import {priceRouter} from 'src/api/rest/routes/price'
 import {rpcRouter} from 'src/api/rest/routes/rpcRouter'
-
+import {signatureRouter} from 'src/api/rest/routes/signature'
+import {stakingTransactionRouter} from 'src/api/rest/routes/stakingTransaction'
+import {transactionRouter} from 'src/api/rest/routes/transaction'
 import {transport} from 'src/api/rest/transport'
+import {config} from 'src/config'
+import {logger} from 'src/logger'
+
 const l = logger(module)
 
 export const RESTServer = async () => {
@@ -71,7 +70,7 @@ export const RESTServer = async () => {
     server = http.createServer(api).listen(config.api.rest.port, () => {
       l.info(`REST API listening at http://localhost:${config.api.rest.port}`)
     })
-  } catch (error) {
+  } catch (error: any) {
     l.error('Error when starting up API', {error})
   }
 

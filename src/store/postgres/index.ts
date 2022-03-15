@@ -1,29 +1,28 @@
 import {Pool} from 'pg'
+import {config} from 'src/config'
 import {logger} from 'src/logger'
-import {scheme} from './scheme'
 import {IStorage} from 'src/store/interface'
-import {logTime} from 'src/utils/logTime'
-import {Query, PostgresStorageOptions} from './types'
-import {PostgresStorageBlock} from './Block'
-import {PostgresStorageLog} from './Log'
-import {PostgresStorageStakingTransaction} from './StakingTransaction'
-import {PostgresStorageTransaction} from './Transaction'
-import {PostgresStorageIndexer} from 'src/store/postgres/Indexer'
-import {PostgresStorageInternalTransaction} from 'src/store/postgres/InternalTransaction'
 import {PostgresStorageAddress} from 'src/store/postgres/Address'
 import {PostgresStorageContract} from 'src/store/postgres/Contract'
-import LoggerModule from 'zerg/dist/LoggerModule'
-import {ShardID, CountableEntities} from 'src/types'
-import {fromSnakeToCamelResponse, mapNamingReverse} from 'src/store/postgres/queryMapper'
-import {PostgresStorageERC20} from 'src/store/postgres/ERC20'
-import {PostgresStorageSignature} from 'src/store/postgres/Signatures'
-import {PostgresStorageMetrics} from 'src/store/postgres/Metrics'
-import {PostgresStorageERC721} from 'src/store/postgres/ERC721'
 import {PostgresStorageERC1155} from 'src/store/postgres/ERC1155'
+import {PostgresStorageERC20} from 'src/store/postgres/ERC20'
+import {PostgresStorageERC721} from 'src/store/postgres/ERC721'
+import {PostgresStorageIndexer} from 'src/store/postgres/Indexer'
+import {PostgresStorageInternalTransaction} from 'src/store/postgres/InternalTransaction'
+import {PostgresStorageMetrics} from 'src/store/postgres/Metrics'
 import {PostgresStorageOneWalletMetrics} from 'src/store/postgres/OneWalletMetrics'
+import {mapNamingReverse} from 'src/store/postgres/queryMapper'
+import {PostgresStorageSignature} from 'src/store/postgres/Signatures'
 import {PostgresStorageUtils} from 'src/store/postgres/utils'
-
-import {config} from 'src/config'
+import {CountableEntities, ShardID} from 'src/types'
+import {logTime} from 'src/utils/logTime'
+import LoggerModule from 'zerg/dist/LoggerModule'
+import {PostgresStorageBlock} from './Block'
+import {PostgresStorageLog} from './Log'
+import {scheme} from './scheme'
+import {PostgresStorageStakingTransaction} from './StakingTransaction'
+import {PostgresStorageTransaction} from './Transaction'
+import {PostgresStorageOptions, Query} from './types'
 
 const defaultRetries = 2
 
@@ -114,7 +113,7 @@ export class PostgresStorage implements IStorage {
 
     try {
       return await this.queryWithoutRetry(sql, params)
-    } catch (e) {
+    } catch (e: any) {
       const retriesLeft = retries - 1
       if (retriesLeft > 0) {
         await sleep(200)
@@ -144,7 +143,7 @@ export class PostgresStorage implements IStorage {
       */
 
       return rows
-    } catch (e) {
+    } catch (e: any) {
       this.l.debug(e.message || e, {sql, params})
       throw new Error(e)
     }
@@ -152,11 +151,10 @@ export class PostgresStorage implements IStorage {
 
   // approximate count
   getCount = async (table: CountableEntities) => {
-    const [
-      {reltuples: count},
-    ] = await this.query(`select reltuples::bigint from pg_catalog.pg_class where relname = $1`, [
-      mapNamingReverse[table] || table,
-    ])
+    const [{reltuples: count}] = await this.query(
+      `select reltuples::bigint from pg_catalog.pg_class where relname = $1`,
+      [mapNamingReverse[table] || table]
+    )
 
     return {count}
   }

@@ -29,7 +29,7 @@ const runMethod: (
 
     const response = await f(...params)
     return {event: `Response`, response}
-  } catch (error) {
+  } catch (error: any) {
     return {event: 'Error', response: errorToObject(error)}
   }
 }

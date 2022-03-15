@@ -12,7 +12,7 @@ export function logger(module: {filename: string}, name = '') {
   try {
     // commonjs
     filename = module.filename.split('src/')[1].split('.')[0]
-  } catch (e) {
+  } catch (e: any) {
     // for webpack build
     // @ts-ignore
     filename = Object.keys(module.exports)[0] || 'main'

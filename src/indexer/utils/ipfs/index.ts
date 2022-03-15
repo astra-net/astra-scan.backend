@@ -19,7 +19,7 @@ export const getByIPFSHash = async (hash: string, retries = 3) => {
       .finally(() => {
         clearTimeout(timeout)
       })
-  } catch (e) {
+  } catch (e: any) {
     if (retries <= 0) {
       throw new Error(e)
     }

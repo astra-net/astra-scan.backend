@@ -106,7 +106,7 @@ export class LogIndexer {
         this.decreaseBatchCount()
         setTimeout(this.loop, approximateBlockMintingTime)
       }
-    } catch (err) {
+    } catch (err: any) {
       this.l.warn(`Batch failed. Retrying in ${approximateBlockMintingTime}ms`, err.message || err)
       this.decreaseBatchCount()
       setTimeout(this.loop, approximateBlockMintingTime)

@@ -1,21 +1,20 @@
-import {transport} from './transport'
 import {config} from 'src/config'
+import {mainnetChainID} from 'src/constants'
 import {
-  Block,
-  RPCBlock,
-  ShardID,
-  TransactionHash,
-  RPCTransactionHarmony,
-  Topic,
   Address,
+  Block,
   BlockNumber,
-  Log,
-  InternalTransaction,
   ByteCode,
+  InternalTransaction,
+  Log,
+  RPCTransactionAstra,
+  ShardID,
+  Topic,
+  TransactionHash,
   TransactionReceipt,
 } from 'types/blockchain'
 import {mapBlockFromResponse, mapInternalTransactionFromBlockTrace} from './mappers'
-import {mainnetChainID} from 'src/constants'
+import {transport} from './transport'
 
 // todo remove shard ID
 export const getBlocks = (
@@ -35,7 +34,7 @@ export const getBlocks = (
     // disable including staking txs for main net before 3358745 where implemented
     inclStaking: config.indexer.chainID === mainnetChainID && +to >= 3358745 ? inclStaking : false,
   }
-  return transport(shardID, 'hmy_getBlocks', [from, to, o]).then((blocks) =>
+  return transport(shardID, 'astra_getBlocks', [from, to, o]).then((blocks) =>
     blocks.map(mapBlockFromResponse)
   )
 }
@@ -51,7 +50,7 @@ export const getBlockByNumber = (
 export const getTransactionByHash = (
   shardID: ShardID,
   hash: TransactionHash
-): Promise<RPCTransactionHarmony> => {
+): Promise<RPCTransactionAstra> => {
   return transport(shardID, 'eth_getTransactionByHash', [hash])
 }
 
@@ -72,7 +71,7 @@ export const getLogs = (
 }
 
 export const getBalance = (shardID: ShardID, address: Address): Promise<TransactionReceipt> => {
-  return transport(shardID, 'hmy_getBalance', [address, 'latest'])
+  return transport(shardID, 'astra_getBalance', [address, 'latest'])
 }
 
 type transactionCountType = 'ALL' | 'RECEIVED' | 'SENT'
@@ -81,14 +80,14 @@ export const getTransactionCount = (
   address: Address,
   type: transactionCountType = 'ALL'
 ): Promise<TransactionReceipt> => {
-  return transport(shardID, 'hmyv2_getTransactionsCount', [address, type])
+  return transport(shardID, 'astrav2_getTransactionsCount', [address, type])
 }
 
 export const getTransactionReceipt = (
   shardID: ShardID,
   hash: TransactionHash
 ): Promise<TransactionReceipt> => {
-  return transport(shardID, 'hmyv2_getTransactionReceipt', [hash])
+  return transport(shardID, 'astrav2_getTransactionReceipt', [hash])
 }
 
 export const getTransactionTrace = (
@@ -142,5 +141,5 @@ export const call = (
   params: Call,
   blockNumber: BlockNumber | 'latest' | 'earliest' | 'pending' = 'latest'
 ): Promise<ByteCode> => {
-  return transport(shardID, 'hmy_call', [params, blockNumber])
+  return transport(shardID, 'astra_call', [params, blockNumber])
 }

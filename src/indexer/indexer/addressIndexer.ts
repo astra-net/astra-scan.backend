@@ -1,11 +1,11 @@
 import {
-  Address2Transaction,
   Address,
-  BlockHash,
-  Block,
-  TransactionHash,
-  TransactionHarmonyHash,
+  Address2Transaction,
   AddressTransactionType,
+  Block,
+  BlockHash,
+  TransactionHash,
+  TransactionAstraHash
 } from 'src/types'
 
 export const AddressIndexer = () => {
@@ -13,7 +13,7 @@ export const AddressIndexer = () => {
 
   const add = (
     block: Block,
-    transactionHash: TransactionHash | TransactionHarmonyHash,
+    transactionHash: TransactionHash | TransactionAstraHash,
     transactionType: AddressTransactionType,
     ...addresses: Address[]
   ) => {

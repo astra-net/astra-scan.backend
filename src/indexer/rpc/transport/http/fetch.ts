@@ -1,12 +1,11 @@
-import nodeFetch from 'node-fetch'
-import {RPCETHMethod, RPCHarmonyMethod} from 'types/blockchain'
 import AbortController from 'abort-controller'
+import nodeFetch from 'node-fetch'
+import {RPCErrorPrefix} from 'src/indexer/rpc/transport/constants'
 import {logger} from 'src/logger'
-import {config} from 'src/config'
-import {RPCUrls} from '../../RPCUrls'
 import {ShardID} from 'src/types/blockchain'
 import {logTime} from 'src/utils/logTime'
-import {RPCErrorPrefix} from 'src/indexer/rpc/transport/constants'
+import {RPCAstraMethod, RPCETHMethod} from 'types/blockchain'
+import {RPCUrls} from '../../RPCUrls'
 
 const l = logger(module)
 
@@ -16,18 +15,18 @@ const increaseTimeout = (retry: number) => defaultFetchTimeout
 
 export const HTTPTransport = async (
   shardID: ShardID,
-  method: RPCETHMethod | RPCHarmonyMethod,
+  method: RPCETHMethod | RPCAstraMethod,
   params: any[]
 ): Promise<any> => {
   const exec = async (
     shardID: ShardID,
-    method: RPCETHMethod | RPCHarmonyMethod,
+    method: RPCETHMethod | RPCAstraMethod,
     params: any[],
     retry = defaultRetries
   ): Promise<any> => {
     try {
       return await fetchWithoutRetry(shardID, method, params, increaseTimeout(retry))
-    } catch (err) {
+    } catch (err: any) {
       const isRCPErrorResponse = err.message.indexOf(RPCErrorPrefix) !== -1
 
       const retriesLeft = retry - 1
@@ -50,7 +49,7 @@ export const HTTPTransport = async (
 
 const fetchWithoutRetry = (
   shardID: ShardID,
-  method: RPCETHMethod | RPCHarmonyMethod,
+  method: RPCETHMethod | RPCAstraMethod,
   params: any[],
   timeout = defaultFetchTimeout
 ) => {

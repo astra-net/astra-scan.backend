@@ -48,7 +48,7 @@ export const run = async () => {
         resolve(decrypted)
       })
     })
-  } catch (err) {
+  } catch (err: any) {
     console.error(err)
     process.exit(1)
   }

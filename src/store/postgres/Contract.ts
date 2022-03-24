@@ -1,43 +1,51 @@
-import { IStorageContract } from 'src/store/interface';
-import { buildSQLQuery } from 'src/store/postgres/filters';
-import { fromSnakeToCamelResponse, generateQuery } from 'src/store/postgres/queryMapper';
-import { Query } from 'src/store/postgres/types';
+import { IStorageContract } from "src/store/interface";
+import { buildSQLQuery } from "src/store/postgres/filters";
 import {
-  Contract, ContractEvent, ContractQueryField,
-  ContractQueryValue, Filter,
-  Transaction
-} from 'src/types';
+  fromSnakeToCamelResponse,
+  generateQuery,
+} from "src/store/postgres/queryMapper";
+import { Query } from "src/store/postgres/types";
+import {
+  Contract,
+  ContractEvent,
+  ContractQueryField,
+  ContractQueryValue,
+  Filter,
+  Transaction,
+} from "src/types";
 
 export class PostgresStorageContract implements IStorageContract {
-  query: Query
+  query: Query;
 
   constructor(query: Query) {
-    this.query = query
+    this.query = query;
   }
 
   addContract = async (contract: Contract) => {
-    const {query, params} = generateQuery(contract)
-    console.log("New Contract at block: ", params[3])
+    const { query, params } = generateQuery(contract);
+    console.log("New Contract at block: ", params[3]);
     return await this.query(
       `insert into contracts ${query} on conflict (address) do nothing;`,
       params
-    )
-  }
+    );
+  };
 
   getContracts = async (filter: Filter): Promise<Contract[]> => {
-    const q = buildSQLQuery(filter)
-    const res = await this.query(`select * from contracts ${q}`, [])
+    const q = buildSQLQuery(filter);
+    const res = await this.query(`select * from contracts ${q}`, []);
 
-    return res.map(fromSnakeToCamelResponse)
-  }
+    return res.map(fromSnakeToCamelResponse);
+  };
 
   getContractByField = async (
     field: ContractQueryField,
     value: ContractQueryValue
   ): Promise<Transaction[]> => {
-    const res = await this.query(`select * from contracts where ${field}=$1;`, [value])
-    return res.map(fromSnakeToCamelResponse)
-  }
+    const res = await this.query(`select * from contracts where ${field}=$1;`, [
+      value,
+    ]);
+    return res.map(fromSnakeToCamelResponse);
+  };
 
   addContractEvent = (event: ContractEvent) => {
     return this.query(
@@ -55,22 +63,22 @@ export class PostgresStorageContract implements IStorageContract {
         event.to,
         event.value,
       ]
-    )
-  }
+    );
+  };
 
   addContractEventsBatch = (events: ContractEvent[]) => {
-    const paramsNumber = 9
+    const paramsNumber = 9;
     const valuesList = events
       .map(
         (e, eventIndex) =>
-          '(' +
+          "(" +
           Array(paramsNumber)
             .fill(null)
-            .map((n, index) => '$' + (index + eventIndex * paramsNumber + 1))
-            .join(', ') +
-          ')'
+            .map((n, index) => "$" + (index + eventIndex * paramsNumber + 1))
+            .join(", ") +
+          ")"
       )
-      .join(',')
+      .join(",");
     const paramsList = events.flatMap((event) => {
       return [
         event.blockNumber,
@@ -82,13 +90,13 @@ export class PostgresStorageContract implements IStorageContract {
         event.from,
         event.to,
         event.value,
-      ]
-    })
+      ];
+    });
     return this.query(
       `insert into contract_events (block_number, transaction_type, event_type, transaction_index, transaction_hash, address, "from", "to", value)
             values ${valuesList}
             on conflict do nothing;`,
       paramsList
-    )
-  }
+    );
+  };
 }

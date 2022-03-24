@@ -1,1 +1,1 @@
-export * from './EntityIterator'
+export * from "./EntityIterator";

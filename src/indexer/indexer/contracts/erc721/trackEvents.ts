@@ -1,20 +1,22 @@
-import { zeroAddress } from 'src/indexer/indexer/contracts/utils/zeroAddress';
-import { logger } from 'src/logger';
-import { PostgresStorage } from 'src/store/postgres';
-import { ContractEvent, ContractEventType, IERC721, Log } from 'src/types';
-import { normalizeAddress } from 'src/utils/normalizeAddress';
-import { ABI } from './ABI';
+import { zeroAddress } from "src/indexer/indexer/contracts/utils/zeroAddress";
+import { logger } from "src/logger";
+import { PostgresStorage } from "src/store/postgres";
+import { ContractEvent, ContractEventType, IERC721, Log } from "src/types";
+import { normalizeAddress } from "src/utils/normalizeAddress";
+import { ABI } from "./ABI";
 
-const {getEntryByName, decodeLog, call} = ABI
+const { getEntryByName, decodeLog, call } = ABI;
 
-const l = logger(module, 'erc721')
+const l = logger(module, "erc721");
 
-const transferSignature = getEntryByName(ContractEventType.Transfer)!.signature
-const approvalForAllSignature = getEntryByName(ContractEventType.ApprovalForAll)!.signature
+const transferSignature = getEntryByName(ContractEventType.Transfer)!.signature;
+const approvalForAllSignature = getEntryByName(
+  ContractEventType.ApprovalForAll
+)!.signature;
 
 type IParams = {
-  token: IERC721
-}
+  token: IERC721;
+};
 
 // logic
 // add property update_needed
@@ -22,72 +24,89 @@ type IParams = {
 //
 // todo filter out other topics
 
-export const trackEvents = async (store: PostgresStorage, logs: Log[], {token}: IParams) => {
-  const filteredLogs = logs.filter(({topics}) => topics.includes(transferSignature))
+export const trackEvents = async (
+  store: PostgresStorage,
+  logs: Log[],
+  { token }: IParams
+) => {
+  const filteredLogs = logs.filter(({ topics }) =>
+    topics.includes(transferSignature)
+  );
   if (filteredLogs.length > 0) {
-    const tokenAddress = filteredLogs[0].address
-    const addressesToUpdate = new Set<{address: string; tokenId: string}>() // unique addresses of senders and recipients
+    const tokenAddress = filteredLogs[0].address;
+    const addressesToUpdate = new Set<{ address: string; tokenId: string }>(); // unique addresses of senders and recipients
 
     const contractEvents = filteredLogs
       .map((log) => {
-        const [topic0, ...topics] = log.topics
-        const {from, to, value, tokenId} = decodeLog(ContractEventType.Transfer, log.data, topics)
+        const [topic0, ...topics] = log.topics;
+        const { from, to, value, tokenId } = decodeLog(
+          ContractEventType.Transfer,
+          log.data,
+          topics
+        );
         if (![from, to].includes(zeroAddress)) {
-          const fromNormalized = normalizeAddress(from) as string
-          const toNormalized = normalizeAddress(to) as string
+          const fromNormalized = normalizeAddress(from) as string;
+          const toNormalized = normalizeAddress(to) as string;
 
-          addressesToUpdate.add({address: fromNormalized, tokenId})
-          addressesToUpdate.add({address: toNormalized, tokenId})
+          addressesToUpdate.add({ address: fromNormalized, tokenId });
+          addressesToUpdate.add({ address: toNormalized, tokenId });
 
           return {
             address: normalizeAddress(tokenAddress),
             from: fromNormalized,
             to: toNormalized,
-            value: typeof value !== 'undefined' ? BigInt(value).toString() : undefined,
+            value:
+              typeof value !== "undefined"
+                ? BigInt(value).toString()
+                : undefined,
             blockNumber: log.blockNumber,
             transactionIndex: log.transactionIndex,
             transactionHash: log.transactionHash,
-            transactionType: 'erc721',
+            transactionType: "erc721",
             eventType: ContractEventType.Transfer,
-          } as ContractEvent
+          } as ContractEvent;
         }
       })
-      .filter((e) => e) as ContractEvent[]
+      .filter((e) => e) as ContractEvent[];
 
     // todo burn token?
-    const addEventsPromises = contractEvents.map((e) => store.contract.addContractEvent(e))
+    const addEventsPromises = contractEvents.map((e) =>
+      store.contract.addContractEvent(e)
+    );
     const updateAssetPromises = [...addressesToUpdate.values()].map((item) =>
       store.erc721.setNeedUpdateAsset(item.address, tokenAddress, item.tokenId)
-    )
+    );
 
-    await Promise.all(updateAssetPromises.concat(addEventsPromises))
+    await Promise.all(updateAssetPromises.concat(addEventsPromises));
 
     l.info(
       `${updateAssetPromises.length} tokens marked need update balances for "${token.name}" ${token.address}`
-    )
+    );
   }
 
-  const approvalForAllLogs = logs.filter(({topics}) => topics.includes(approvalForAllSignature))
+  const approvalForAllLogs = logs.filter(({ topics }) =>
+    topics.includes(approvalForAllSignature)
+  );
   if (approvalForAllLogs.length > 0) {
     const events = approvalForAllLogs.map((log) => {
-      const [topic0, ...topics] = log.topics
-      const {owner, operator, approved} = decodeLog(
+      const [topic0, ...topics] = log.topics;
+      const { owner, operator, approved } = decodeLog(
         ContractEventType.ApprovalForAll,
         log.data,
         topics
-      )
+      );
       return {
         address: normalizeAddress(operator),
         from: normalizeAddress(owner),
-        to: '',
+        to: "",
         value: (+!!approved).toString(),
         blockNumber: log.blockNumber,
         transactionIndex: log.transactionIndex,
         transactionHash: log.transactionHash,
-        transactionType: 'erc721',
+        transactionType: "erc721",
         eventType: ContractEventType.ApprovalForAll,
-      } as ContractEvent
-    })
-    await Promise.all(events.map((e) => store.contract.addContractEvent(e)))
+      } as ContractEvent;
+    });
+    await Promise.all(events.map((e) => store.contract.addContractEvent(e)));
   }
-}
+};

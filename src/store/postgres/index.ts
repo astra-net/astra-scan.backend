@@ -1,77 +1,82 @@
-import {Pool} from 'pg'
-import {config} from 'src/config'
-import {logger} from 'src/logger'
-import {IStorage} from 'src/store/interface'
-import {PostgresStorageAddress} from 'src/store/postgres/Address'
-import {PostgresStorageContract} from 'src/store/postgres/Contract'
-import {PostgresStorageERC1155} from 'src/store/postgres/ERC1155'
-import {PostgresStorageERC20} from 'src/store/postgres/ERC20'
-import {PostgresStorageERC721} from 'src/store/postgres/ERC721'
-import {PostgresStorageIndexer} from 'src/store/postgres/Indexer'
-import {PostgresStorageInternalTransaction} from 'src/store/postgres/InternalTransaction'
-import {PostgresStorageMetrics} from 'src/store/postgres/Metrics'
-import {PostgresStorageOneWalletMetrics} from 'src/store/postgres/OneWalletMetrics'
-import {mapNamingReverse} from 'src/store/postgres/queryMapper'
-import {PostgresStorageSignature} from 'src/store/postgres/Signatures'
-import {PostgresStorageUtils} from 'src/store/postgres/utils'
-import {CountableEntities, ShardID} from 'src/types'
-import {logTime} from 'src/utils/logTime'
-import LoggerModule from 'zerg/dist/LoggerModule'
-import {PostgresStorageBlock} from './Block'
-import {PostgresStorageLog} from './Log'
-import {scheme} from './scheme'
-import {PostgresStorageStakingTransaction} from './StakingTransaction'
-import {PostgresStorageTransaction} from './Transaction'
-import {PostgresStorageOptions, Query} from './types'
+import { Pool } from "pg";
+import { config } from "src/config";
+import { logger } from "src/logger";
+import { IStorage } from "src/store/interface";
+import { PostgresStorageAddress } from "src/store/postgres/Address";
+import { PostgresStorageContract } from "src/store/postgres/Contract";
+import { PostgresStorageERC1155 } from "src/store/postgres/ERC1155";
+import { PostgresStorageERC20 } from "src/store/postgres/ERC20";
+import { PostgresStorageERC721 } from "src/store/postgres/ERC721";
+import { PostgresStorageIndexer } from "src/store/postgres/Indexer";
+import { PostgresStorageInternalTransaction } from "src/store/postgres/InternalTransaction";
+import { PostgresStorageMetrics } from "src/store/postgres/Metrics";
+import { PostgresStorageOneWalletMetrics } from "src/store/postgres/OneWalletMetrics";
+import { mapNamingReverse } from "src/store/postgres/queryMapper";
+import { PostgresStorageSignature } from "src/store/postgres/Signatures";
+import { PostgresStorageUtils } from "src/store/postgres/utils";
+import { CountableEntities, ShardID } from "src/types";
+import { logTime } from "src/utils/logTime";
+import LoggerModule from "zerg/dist/LoggerModule";
+import { PostgresStorageBlock } from "./Block";
+import { PostgresStorageLog } from "./Log";
+import { scheme } from "./scheme";
+import { PostgresStorageStakingTransaction } from "./StakingTransaction";
+import { PostgresStorageTransaction } from "./Transaction";
+import { PostgresStorageOptions, Query } from "./types";
 
-const defaultRetries = 2
+const defaultRetries = 2;
 
-const sleep = (time = 1000) => new Promise((r) => setTimeout(r, time))
+const sleep = (time = 1000) => new Promise((r) => setTimeout(r, time));
 
 export class PostgresStorage implements IStorage {
-  db: Pool
-  block: PostgresStorageBlock
-  log: PostgresStorageLog
-  transaction: PostgresStorageTransaction
-  internalTransaction: PostgresStorageInternalTransaction
-  indexer: PostgresStorageIndexer
-  staking: PostgresStorageStakingTransaction
-  address: PostgresStorageAddress
-  contract: PostgresStorageContract
-  erc20: PostgresStorageERC20
-  erc721: PostgresStorageERC721
-  erc1155: PostgresStorageERC1155
-  signature: PostgresStorageSignature
-  metrics: PostgresStorageMetrics
-  oneWalletMetrics: PostgresStorageOneWalletMetrics
-  utils: PostgresStorageUtils
+  db: Pool;
+  block: PostgresStorageBlock;
+  log: PostgresStorageLog;
+  transaction: PostgresStorageTransaction;
+  internalTransaction: PostgresStorageInternalTransaction;
+  indexer: PostgresStorageIndexer;
+  staking: PostgresStorageStakingTransaction;
+  address: PostgresStorageAddress;
+  contract: PostgresStorageContract;
+  erc20: PostgresStorageERC20;
+  erc721: PostgresStorageERC721;
+  erc1155: PostgresStorageERC1155;
+  signature: PostgresStorageSignature;
+  metrics: PostgresStorageMetrics;
+  oneWalletMetrics: PostgresStorageOneWalletMetrics;
+  utils: PostgresStorageUtils;
 
-  isStarted = false
-  isStarting = false
-  l: LoggerModule
-  options: PostgresStorageOptions
-  shardID: ShardID
+  isStarted = false;
+  isStarting = false;
+  l: LoggerModule;
+  options: PostgresStorageOptions;
+  shardID: ShardID;
 
   constructor(options: PostgresStorageOptions) {
-    this.shardID = options.shardID
-    this.block = new PostgresStorageBlock(this.query)
-    this.log = new PostgresStorageLog(this.query)
-    this.transaction = new PostgresStorageTransaction(this.query)
-    this.internalTransaction = new PostgresStorageInternalTransaction(this.query)
-    this.staking = new PostgresStorageStakingTransaction(this.query, this.shardID)
-    this.indexer = new PostgresStorageIndexer(this.query)
-    this.address = new PostgresStorageAddress(this.query)
-    this.contract = new PostgresStorageContract(this.query)
-    this.erc20 = new PostgresStorageERC20(this.query)
-    this.erc721 = new PostgresStorageERC721(this.query)
-    this.erc1155 = new PostgresStorageERC1155(this.query)
-    this.signature = new PostgresStorageSignature(this.query)
-    this.metrics = new PostgresStorageMetrics(this.query)
-    this.oneWalletMetrics = new PostgresStorageOneWalletMetrics(this.query)
-    this.utils = new PostgresStorageUtils(this.query)
+    this.shardID = options.shardID;
+    this.block = new PostgresStorageBlock(this.query);
+    this.log = new PostgresStorageLog(this.query);
+    this.transaction = new PostgresStorageTransaction(this.query);
+    this.internalTransaction = new PostgresStorageInternalTransaction(
+      this.query
+    );
+    this.staking = new PostgresStorageStakingTransaction(
+      this.query,
+      this.shardID
+    );
+    this.indexer = new PostgresStorageIndexer(this.query);
+    this.address = new PostgresStorageAddress(this.query);
+    this.contract = new PostgresStorageContract(this.query);
+    this.erc20 = new PostgresStorageERC20(this.query);
+    this.erc721 = new PostgresStorageERC721(this.query);
+    this.erc1155 = new PostgresStorageERC1155(this.query);
+    this.signature = new PostgresStorageSignature(this.query);
+    this.metrics = new PostgresStorageMetrics(this.query);
+    this.oneWalletMetrics = new PostgresStorageOneWalletMetrics(this.query);
+    this.utils = new PostgresStorageUtils(this.query);
 
-    this.l = logger(module, `shard${options.shardID}`)
-    this.options = options
+    this.l = logger(module, `shard${options.shardID}`);
+    this.options = options;
 
     this.db = new Pool({
       // todo a hack for kms support
@@ -83,64 +88,70 @@ export class PostgresStorage implements IStorage {
       max: options.poolSize,
       // https://node-postgres.com/api/pool
       idleTimeoutMillis: 0,
-    })
+    });
   }
 
   async start() {
-    const p = this.options
-    this.l.info(`postgres://${p.user}@${p.host}:${p.port}/${p.database} starting...`)
+    const p = this.options;
+    this.l.info(
+      `postgres://${p.user}@${p.host}:${p.port}/${p.database} starting...`
+    );
 
-    this.isStarting = true
+    this.isStarting = true;
     // only create the schema if the database is empty
     const e = await this.db.query(
       "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'contracts');"
-    )
+    );
     if (!e.rows[0].exists) {
-      this.l.info('Migrating')
-      await this.migrate()
+      this.l.info("Migrating");
+      await this.migrate();
     }
-    this.isStarted = true
-    this.isStarting = false
-    this.l.info('Done')
+    this.isStarted = true;
+    this.isStarting = false;
+    this.l.info("Done");
   }
 
   async migrate() {
-    await this.db.query(scheme)
+    await this.db.query(scheme);
   }
 
-  query: Query = async (sql: string, params: any[] = [], retries = defaultRetries) => {
+  query: Query = async (
+    sql: string,
+    params: any[] = [],
+    retries = defaultRetries
+  ) => {
     // lazy start
     if (!this.isStarted && !this.isStarting) {
-      return this.start().then(() => this.query(sql, params, retries))
+      return this.start().then(() => this.query(sql, params, retries));
     }
 
     if (this.isStarting) {
-      return sleep().then(() => this.query(sql, params, retries))
+      return sleep().then(() => this.query(sql, params, retries));
     }
 
     try {
-      return await this.queryWithoutRetry(sql, params)
+      return await this.queryWithoutRetry(sql, params);
     } catch (e: any) {
-      const retriesLeft = retries - 1
+      const retriesLeft = retries - 1;
       if (retriesLeft > 0) {
-        await sleep(200)
-        return this.query(sql, params, retriesLeft)
+        await sleep(200);
+        return this.query(sql, params, retriesLeft);
       }
       this.l.warn(`Query failed in ${defaultRetries} attempts`, {
         sql,
         params,
         error: e.message || e,
-      })
-      throw new Error(e)
+      });
+      throw new Error(e);
     }
-  }
+  };
 
   private async queryWithoutRetry(sql: string, params: any[] = []) {
-    const time = logTime()
+    const time = logTime();
 
     try {
-      const {rows} = await this.db.query(sql, params)
-      const timePassed = time()
+      const { rows } = await this.db.query(sql, params);
+      const timePassed = time();
       // l.debug(`Query completed in ${timePassed} ${sql}`, params)
 
       /*
@@ -149,24 +160,24 @@ export class PostgresStorage implements IStorage {
       }
       */
 
-      return rows
+      return rows;
     } catch (e: any) {
-      this.l.debug(e.message || e, {sql, params})
-      throw new Error(e)
+      this.l.debug(e.message || e, { sql, params });
+      throw new Error(e);
     }
   }
 
   // approximate count
   getCount = async (table: CountableEntities) => {
-    const [{reltuples: count}] = await this.query(
+    const [{ reltuples: count }] = await this.query(
       `select reltuples::bigint from pg_catalog.pg_class where relname = $1`,
       [mapNamingReverse[table] || table]
-    )
+    );
 
-    return {count}
-  }
+    return { count };
+  };
 
   async stop() {
-    await this.db.end()
+    await this.db.end();
   }
 }

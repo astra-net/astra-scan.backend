@@ -1,4 +1,4 @@
-import {IStorageAddress} from 'src/store/interface'
+import { IStorageAddress } from "src/store/interface";
 import {
   Address2Transaction,
   Block,
@@ -6,21 +6,24 @@ import {
   AddressTransactionType,
   Address,
   InternalTransaction,
-} from 'src/types'
-import {Query} from 'src/store/postgres/types'
-import {fromSnakeToCamelResponse, generateQuery} from 'src/store/postgres/queryMapper'
-import {buildSQLQuery} from 'src/store/postgres/filters'
+} from "src/types";
+import { Query } from "src/store/postgres/types";
+import {
+  fromSnakeToCamelResponse,
+  generateQuery,
+} from "src/store/postgres/queryMapper";
+import { buildSQLQuery } from "src/store/postgres/filters";
 
 export class PostgresStorageAddress implements IStorageAddress {
-  query: Query
+  query: Query;
 
   constructor(query: Query) {
-    this.query = query
+    this.query = query;
   }
 
   addAddress2Transaction = async (entry: Address2Transaction) => {
     if (!entry.transactionHash) {
-      return
+      return;
     }
 
     // const {query, params} = generateQuery(newEntry)
@@ -30,21 +33,21 @@ export class PostgresStorageAddress implements IStorageAddress {
       on conflict (address, transaction_type) do update
       set transaction_hashes = (array_cat(EXCLUDED.transaction_hashes, address2transaction_fifo.transaction_hashes))[:100];`,
       [entry.transactionHash, entry.address, entry.transactionType]
-    )
-  }
+    );
+  };
 
   getRelatedTransactionsByType = async (
     address: Address,
     type: AddressTransactionType,
     filter: Filter
   ): Promise<Address2Transaction[]> => {
-    const {offset = 0, limit = 10} = filter
-    const subQueryLimit = 10000000
+    const { offset = 0, limit = 10 } = filter;
+    const subQueryLimit = 10000000;
 
-    let txs = []
+    let txs = [];
 
-    if (type === 'erc20' || type === 'erc721') {
-      if (type === 'erc20') {
+    if (type === "erc20" || type === "erc721") {
+      if (type === "erc20") {
         txs = await this.query(
           `
             select t.*
@@ -58,7 +61,7 @@ export class PostgresStorageAddress implements IStorageAddress {
             offset $3
             limit $4`,
           [address, type, offset, limit, subQueryLimit]
-        )
+        );
       } else {
         // Include both erc721 & erc1155
         txs = await this.query(
@@ -77,19 +80,22 @@ export class PostgresStorageAddress implements IStorageAddress {
             order by ce.block_number desc
             offset $4
             limit $5`,
-          [address, type, 'erc1155', offset, limit, subQueryLimit]
-        )
+          [address, type, "erc1155", offset, limit, subQueryLimit]
+        );
       }
 
       // for erc20 and erc721 we add logs to payload
       txs = await Promise.all(
         txs.map(fromSnakeToCamelResponse).map(async (tx: any) => {
-          tx.logs = await this.query('select * from logs where transaction_hash=$1', [tx.hash])
-          return tx
+          tx.logs = await this.query(
+            "select * from logs where transaction_hash=$1",
+            [tx.hash]
+          );
+          return tx;
         })
-      )
-    } else if (type === 'internal_transaction') {
-      const filterQuery = buildSQLQuery({filters: filter.filters})
+      );
+    } else if (type === "internal_transaction") {
+      const filterQuery = buildSQLQuery({ filters: filter.filters });
       txs = await this.query(
         `
       select it.*, t.input, t.timestamp from (
@@ -105,13 +111,13 @@ export class PostgresStorageAddress implements IStorageAddress {
       limit $3
     `,
         [address, offset, limit, subQueryLimit]
-      )
+      );
     } else {
-      let txsTable = 'transactions'
-      if (type === 'staking_transaction') {
-        txsTable = 'staking_transactions'
+      let txsTable = "transactions";
+      if (type === "staking_transaction") {
+        txsTable = "staking_transactions";
       }
-      const filterQuery = buildSQLQuery(filter)
+      const filterQuery = buildSQLQuery(filter);
       txs = await this.query(
         `
         select t.*
@@ -123,23 +129,26 @@ export class PostgresStorageAddress implements IStorageAddress {
         ${filterQuery}
       `,
         [address, subQueryLimit]
-      )
+      );
     }
 
     return txs
       .map(fromSnakeToCamelResponse)
-      .sort((a: InternalTransaction, b: InternalTransaction) => b.blockNumber - a.blockNumber)
-  }
+      .sort(
+        (a: InternalTransaction, b: InternalTransaction) =>
+          b.blockNumber - a.blockNumber
+      );
+  };
 
   getRelatedTransactionsCountByType = async (
     address: Address,
     type: AddressTransactionType,
     filter: Filter
   ): Promise<number> => {
-    const subQueryLimit = 100000 // Count estimate max value
+    const subQueryLimit = 100000; // Count estimate max value
 
-    if (type === 'erc20') {
-      const [{count}] = await this.query(
+    if (type === "erc20") {
+      const [{ count }] = await this.query(
         `
           select count(*) from
           (
@@ -153,10 +162,10 @@ export class PostgresStorageAddress implements IStorageAddress {
           join transactions t on t.hash = ce2.transaction_hash
             `,
         [address, type, subQueryLimit]
-      )
-      return count
-    } else if (type === 'erc721') {
-      const [{count}] = await this.query(
+      );
+      return count;
+    } else if (type === "erc721") {
+      const [{ count }] = await this.query(
         `
           select count(*) from
           (
@@ -173,12 +182,12 @@ export class PostgresStorageAddress implements IStorageAddress {
           ) ce2
           join transactions t on t.hash = ce2.transaction_hash
             `,
-        [address, type, 'erc1155', subQueryLimit]
-      )
-      return count
-    } else if (type === 'internal_transaction') {
-      const filterQuery = buildSQLQuery({filters: filter.filters})
-      const [{count}] = await this.query(
+        [address, type, "erc1155", subQueryLimit]
+      );
+      return count;
+    } else if (type === "internal_transaction") {
+      const filterQuery = buildSQLQuery({ filters: filter.filters });
+      const [{ count }] = await this.query(
         ` 
       select count(t.*) from (
         select * from (
@@ -192,14 +201,14 @@ export class PostgresStorageAddress implements IStorageAddress {
       left join transactions t on t.hash  = it.transaction_hash
     `,
         [address, subQueryLimit]
-      )
-      return count
+      );
+      return count;
     } else {
-      let tableName = 'transactions'
-      if (type === 'staking_transaction') {
-        tableName = 'staking_transactions'
+      let tableName = "transactions";
+      if (type === "staking_transaction") {
+        tableName = "staking_transactions";
       }
-      const [{count}] = await this.query(
+      const [{ count }] = await this.query(
         `
       select count(*)
         from (
@@ -209,8 +218,8 @@ export class PostgresStorageAddress implements IStorageAddress {
         ) t
     `,
         [address, subQueryLimit]
-      )
-      return count
+      );
+      return count;
     }
-  }
+  };
 }

@@ -1,18 +1,23 @@
-import grpc, {ServiceError} from 'grpc'
+import grpc, { ServiceError } from "grpc";
 
 export const catchAsync = (f: Function) => {
-  return async (call: grpc.ServerUnaryCall<any>, callback: grpc.sendUnaryData<any>) => {
+  return async (
+    call: grpc.ServerUnaryCall<any>,
+    callback: grpc.sendUnaryData<any>
+  ) => {
     try {
-      await f(call, (error: ServiceError | null, value: any | null) => callback(error, value))
+      await f(call, (error: ServiceError | null, value: any | null) =>
+        callback(error, value)
+      );
     } catch (err: any) {
       callback(
         {
-          name: 'Error',
+          name: "Error",
           code: grpc.status.ABORTED,
           message: err.message || err,
         },
         null
-      )
+      );
     }
-  }
-}
+  };
+};

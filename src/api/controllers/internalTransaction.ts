@@ -1,6 +1,10 @@
-import {storesAPI as stores} from 'src/store'
-import {InternalTransaction, ShardID, Transaction} from 'src/types/blockchain'
-import {validator} from 'src/utils/validators/validators'
+import { storesAPI as stores } from "src/store";
+import {
+  InternalTransaction,
+  ShardID,
+  Transaction,
+} from "src/types/blockchain";
+import { validator } from "src/utils/validators/validators";
 import {
   is64CharHexHash,
   isBlockNumber,
@@ -12,14 +16,14 @@ import {
   isOneOf,
   isFilters,
   Void,
-} from 'src/utils/validators'
+} from "src/utils/validators";
 import {
   Filter,
   InternalTransactionQueryField,
   TransactionQueryField,
   TransactionQueryValue,
-} from 'src/types/api'
-import {withCache} from 'src/api/controllers/cache'
+} from "src/types/api";
+import { withCache } from "src/api/controllers/cache";
 
 export async function getInternalTransactionsByField(
   shardID: ShardID,
@@ -27,19 +31,22 @@ export async function getInternalTransactionsByField(
   value: TransactionQueryValue
 ): Promise<InternalTransaction[] | null> {
   validator({
-    field: isOneOf(field, ['block_number', 'transaction_hash', 'block_hash']),
-  })
-  if (field === 'block_number') {
+    field: isOneOf(field, ["block_number", "transaction_hash", "block_hash"]),
+  });
+  if (field === "block_number") {
     validator({
       value: isBlockNumber(value),
-    })
+    });
   } else {
     validator({
       value: is64CharHexHash(value),
-    })
+    });
   }
 
-  return await withCache(['getInternalTransactionsByField', arguments], () =>
-    stores[shardID].internalTransaction.getInternalTransactionsByField(field, value)
-  )
+  return await withCache(["getInternalTransactionsByField", arguments], () =>
+    stores[shardID].internalTransaction.getInternalTransactionsByField(
+      field,
+      value
+    )
+  );
 }

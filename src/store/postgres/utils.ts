@@ -1,15 +1,20 @@
-import {Query} from 'src/store/postgres/types'
+import { Query } from "src/store/postgres/types";
 
 export class PostgresStorageUtils {
-  query: Query
+  query: Query;
 
   constructor(query: Query) {
-    this.query = query
+    this.query = query;
   }
 
-  getMissingBlocks = async (fromBlock: number, toBlock: number): Promise<number[]> => {
+  getMissingBlocks = async (
+    fromBlock: number,
+    toBlock: number
+  ): Promise<number[]> => {
     if (!Number.isInteger(fromBlock) || !Number.isInteger(toBlock)) {
-      throw new Error(`both "from" and "to" params should be set, got ${fromBlock}-${toBlock}`)
+      throw new Error(
+        `both "from" and "to" params should be set, got ${fromBlock}-${toBlock}`
+      );
     }
 
     const res = await this.query(
@@ -19,8 +24,8 @@ export class PostgresStorageUtils {
         WHERE NOT EXISTS (SELECT 1 FROM blocks WHERE number = s.id);
         `,
       []
-    )
+    );
 
-    return res.map((r: any) => r.missing_ids)
-  }
+    return res.map((r: any) => r.missing_ids);
+  };
 }

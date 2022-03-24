@@ -1,6 +1,6 @@
-import {storesAPI as stores} from 'src/store'
-import {ShardID} from 'src/types/blockchain'
-import {validator} from 'src/utils/validators/validators'
+import { storesAPI as stores } from "src/store";
+import { ShardID } from "src/types/blockchain";
+import { validator } from "src/utils/validators/validators";
 import {
   is64CharHexHash,
   isBlockNumber,
@@ -11,58 +11,58 @@ import {
   isLimit,
   isOneOf,
   isFilters,
-} from 'src/utils/validators'
-import {Filter} from 'src/types/api'
-import {withCache} from './cache'
+} from "src/utils/validators";
+import { Filter } from "src/types/api";
+import { withCache } from "./cache";
 
 export async function getBlockByNumber(shardID: ShardID, blockNumber: number) {
   validator({
     shardID: isShard(shardID),
     blockNumber: isBlockNumber(blockNumber),
-  })
+  });
 
-  return await withCache(['getBlockByNumber', arguments], () =>
+  return await withCache(["getBlockByNumber", arguments], () =>
     stores[shardID].block.getBlockByNumber(blockNumber)
-  )
+  );
 }
 
 export async function getBlockByHash(shardID: ShardID, blockHash: string) {
   validator({
     shardID: isShard(shardID),
     blockHash: is64CharHexHash(blockHash),
-  })
+  });
 
-  return await withCache(['getBlockByHash', arguments], () =>
+  return await withCache(["getBlockByHash", arguments], () =>
     stores[shardID].block.getBlockByHash(blockHash)
-  )
+  );
 }
 
 export async function getBlocks(shardID: ShardID, filter?: Filter) {
   validator({
     shardID: isShard(shardID),
-  })
+  });
 
   if (filter) {
     validator({
       offset: isOffset(filter.offset),
       limit: isLimit(filter.limit),
-      orderBy: isOrderBy(filter.orderBy, ['number']),
+      orderBy: isOrderBy(filter.orderBy, ["number"]),
       orderDirection: isOrderDirection(filter.orderDirection),
-      filter: isFilters(filter.filters, ['number']),
-    })
+      filter: isFilters(filter.filters, ["number"]),
+    });
   } else {
     filter = {
       offset: 0,
       limit: 10,
-      orderBy: 'number',
-      orderDirection: 'desc',
+      orderBy: "number",
+      orderDirection: "desc",
       filters: [],
-    }
+    };
   }
 
   return await withCache(
-    ['getBlocks', arguments],
+    ["getBlocks", arguments],
     () => stores[shardID].block.getBlocks(filter!),
     2000
-  )
+  );
 }

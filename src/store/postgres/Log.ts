@@ -1,26 +1,26 @@
-import {IStorageLog} from 'src/store/interface'
-import {BlockHash, BlockNumber, Log, LogDetailed} from 'src/types/blockchain'
+import { IStorageLog } from "src/store/interface";
+import { BlockHash, BlockNumber, Log, LogDetailed } from "src/types/blockchain";
 
-import {Query} from 'src/store/postgres/types'
+import { Query } from "src/store/postgres/types";
 import {
   EthGetLogFilter,
   EthGetLogParams,
   Filter,
   InternalTransactionQueryField,
   TransactionQueryValue,
-} from 'src/types'
-import {buildSQLQuery} from 'src/store/postgres/filters'
+} from "src/types";
+import { buildSQLQuery } from "src/store/postgres/filters";
 import {
   fromSnakeToCamelResponse,
   mapLogToEthLog,
   queryParamsConvert,
-} from 'src/store/postgres/queryMapper'
+} from "src/store/postgres/queryMapper";
 
 export class PostgresStorageLog implements IStorageLog {
-  query: Query
+  query: Query;
 
   constructor(query: Query) {
-    this.query = query
+    this.query = query;
   }
 
   addLog = async (log: Log): Promise<any> => {
@@ -49,39 +49,50 @@ export class PostgresStorageLog implements IStorageLog {
         parseInt(log.logIndex, 16),
         log.removed,
       ]
-    )
-  }
+    );
+  };
 
-  getLogsByTransactionHash = async (TransactionHash: string): Promise<Log[] | null> => {
-    const res = await this.query(`select * from logs where transaction_hash=$1;`, [TransactionHash])
+  getLogsByTransactionHash = async (
+    TransactionHash: string
+  ): Promise<Log[] | null> => {
+    const res = await this.query(
+      `select * from logs where transaction_hash=$1;`,
+      [TransactionHash]
+    );
 
-    return res as Log[]
-  }
+    return res as Log[];
+  };
   getLogsByBlockNumber = async (num: BlockNumber): Promise<Log[] | null> => {
-    const res = await this.query(`select * from logs where block_number=$1;`, [num])
+    const res = await this.query(`select * from logs where block_number=$1;`, [
+      num,
+    ]);
 
-    return res as Log[]
-  }
+    return res as Log[];
+  };
   getLogsByBlockHash = async (hash: BlockHash): Promise<Log[] | null> => {
-    const res = await this.query(`select * from logs where block_hash=$1;`, [hash])
+    const res = await this.query(`select * from logs where block_hash=$1;`, [
+      hash,
+    ]);
 
-    return res as Log[]
-  }
+    return res as Log[];
+  };
 
   getLogs = async (filter: Filter): Promise<Log[]> => {
-    const q = buildSQLQuery(filter)
-    const res = await this.query(`select * from logs ${q}`, [])
+    const q = buildSQLQuery(filter);
+    const res = await this.query(`select * from logs ${q}`, []);
 
-    return res.map(fromSnakeToCamelResponse)
-  }
+    return res.map(fromSnakeToCamelResponse);
+  };
 
   getLogsByField = async (
     field: InternalTransactionQueryField,
     value: TransactionQueryValue
   ): Promise<Log[]> => {
-    const res = await this.query(`select * from logs where ${field}=$1;`, [value])
-    return res.map(fromSnakeToCamelResponse)
-  }
+    const res = await this.query(`select * from logs where ${field}=$1;`, [
+      value,
+    ]);
+    return res.map(fromSnakeToCamelResponse);
+  };
 
   getDetailedLogsByField = async (
     field: InternalTransactionQueryField,
@@ -99,55 +110,57 @@ export class PostgresStorageLog implements IStorageLog {
         offset ${offset} limit ${limit};
     `,
       [value]
-    )
-    return res.map(fromSnakeToCamelResponse)
-  }
+    );
+    return res.map(fromSnakeToCamelResponse);
+  };
 
   ethGetLogs = async (filter: EthGetLogFilter) => {
-    const {topics, ...restFilters} = filter
-    const whereClause = []
+    const { topics, ...restFilters } = filter;
+    const whereClause = [];
 
-    const queryParams: Omit<EthGetLogFilter, 'topics'> & {topics?: string} = {...restFilters}
+    const queryParams: Omit<EthGetLogFilter, "topics"> & { topics?: string } = {
+      ...restFilters,
+    };
     if (topics) {
-      queryParams.topics = `{${topics.join(',')}}` // convert topics array to SQL array
+      queryParams.topics = `{${topics.join(",")}}`; // convert topics array to SQL array
     }
 
     if (filter.blockhash) {
-      whereClause.push('block_hash = :blockhash')
+      whereClause.push("block_hash = :blockhash");
     } else {
       if (filter.from) {
-        whereClause.push('block_number >= :from')
+        whereClause.push("block_number >= :from");
       }
       if (filter.to) {
-        whereClause.push('block_number <= :to')
+        whereClause.push("block_number <= :to");
       }
     }
 
     if (filter.address) {
       if (Array.isArray(filter.address)) {
-        whereClause.push('address = any (:address)')
+        whereClause.push("address = any (:address)");
       } else {
-        whereClause.push('address = :address')
+        whereClause.push("address = :address");
       }
     }
 
     if (topics) {
-      whereClause.push('topics @> :topics')
+      whereClause.push("topics @> :topics");
     }
 
     const preparedQuery = queryParamsConvert(
       `
         select * from logs
-        where ${whereClause.length > 0 ? whereClause.join(' and ') : ''}
+        where ${whereClause.length > 0 ? whereClause.join(" and ") : ""}
     `,
       queryParams
-    )
+    );
 
-    const res = await this.query(preparedQuery.text, preparedQuery.values)
+    const res = await this.query(preparedQuery.text, preparedQuery.values);
 
     return res
       .map(fromSnakeToCamelResponse)
       .sort((a: Log, b: Log) => +a.logIndex - +b.logIndex)
-      .map(mapLogToEthLog)
-  }
+      .map(mapLogToEthLog);
+  };
 }

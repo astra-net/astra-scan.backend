@@ -1,15 +1,15 @@
-import {config} from 'src/config'
-import fs from 'fs'
-import path from 'path'
+import { config } from "src/config";
+import fs from "fs";
+import path from "path";
 
-const contractStartBlock = config.indexer.initialLogsSyncingHeight
-const chainID = config.indexer.chainID
+const contractStartBlock = config.indexer.initialLogsSyncingHeight;
+const chainID = config.indexer.chainID;
 
 // todo whitelist
-const tasks = config.indexer.trackContractTypes
+const tasks = config.indexer.trackContractTypes;
 
 // todo filename
-const sql = fs.readFileSync(path.join(__dirname, 'sql', './scheme.sql'))
+const sql = fs.readFileSync(path.join(__dirname, "sql", "./scheme.sql"));
 
 export const scheme = `
     ${sql}
@@ -27,5 +27,5 @@ export const scheme = `
       values ('${name}_contracts',0, ${chainID}) on conflict(indexer_name) do nothing;
     `
       )
-      .join('')}          
-`
+      .join("")}          
+`;

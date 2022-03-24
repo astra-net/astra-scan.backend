@@ -1,29 +1,29 @@
-import nodeFetch from 'node-fetch'
-import {config} from 'src/config'
-import AbortController from 'abort-controller'
+import nodeFetch from "node-fetch";
+import { config } from "src/config";
+import AbortController from "abort-controller";
 
-const IPFSGateway = config.indexer.IPFSGateway
+const IPFSGateway = config.indexer.IPFSGateway;
 
 export const getByIPFSHash = async (hash: string, retries = 3) => {
-  const hasProtocol = hash.indexOf('http') === 0
-  const url = hasProtocol ? hash : `${IPFSGateway}${hash}`
+  const hasProtocol = hash.indexOf("http") === 0;
+  const url = hasProtocol ? hash : `${IPFSGateway}${hash}`;
 
-  const controller = new AbortController()
+  const controller = new AbortController();
   const timeout = setTimeout(() => {
-    controller.abort()
-  }, 20000)
+    controller.abort();
+  }, 20000);
 
   try {
-    return await nodeFetch(url, {signal: controller.signal})
+    return await nodeFetch(url, { signal: controller.signal })
       .then((r) => r.json())
       .finally(() => {
-        clearTimeout(timeout)
-      })
+        clearTimeout(timeout);
+      });
   } catch (e: any) {
     if (retries <= 0) {
-      throw new Error(e)
+      throw new Error(e);
     }
 
-    setTimeout(() => getByIPFSHash(hash, retries - 1), 3000)
+    setTimeout(() => getByIPFSHash(hash, retries - 1), 3000);
   }
-}
+};

@@ -1,1 +1,1 @@
-export const RPCErrorPrefix = 'RPC Error'
+export const RPCErrorPrefix = "RPC Error";

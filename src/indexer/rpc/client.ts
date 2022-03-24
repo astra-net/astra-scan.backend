@@ -1,5 +1,5 @@
-import { config } from 'src/config';
-import { mainnetChainID } from 'src/constants';
+import { config } from "src/config";
+import { mainnetChainID } from "src/constants";
 import {
   Address,
   Block,
@@ -11,10 +11,13 @@ import {
   ShardID,
   Topic,
   TransactionHash,
-  TransactionReceipt
-} from 'types/blockchain';
-import { mapBlockFromResponse, mapInternalTransactionFromBlockTrace } from './mappers';
-import { transport } from './transport';
+  TransactionReceipt,
+} from "types/blockchain";
+import {
+  mapBlockFromResponse,
+  mapInternalTransactionFromBlockTrace,
+} from "./mappers";
+import { transport } from "./transport";
 
 // todo remove shard ID
 export const getBlocks = (
@@ -25,34 +28,39 @@ export const getBlocks = (
   withSigners = false,
   inclStaking = true
 ): Promise<Block[]> => {
-  const from = '0x' + fromBlock.toString(16)
-  const to = '0x' + toBlock.toString(16)
+  const from = "0x" + fromBlock.toString(16);
+  const to = "0x" + toBlock.toString(16);
 
   const o = {
     fullTx,
     withSigners,
     // disable including staking txs for main net before 3358745 where implemented
-    inclStaking: config.indexer.chainID === mainnetChainID && +to >= 3358745 ? inclStaking : false,
-  }
-  return transport(shardID, 'astra_getBlocks', [from, to, o]).then((blocks) =>
+    inclStaking:
+      config.indexer.chainID === mainnetChainID && +to >= 3358745
+        ? inclStaking
+        : false,
+  };
+  return transport(shardID, "astra_getBlocks", [from, to, o]).then((blocks) =>
     blocks.map(mapBlockFromResponse)
-  )
-}
+  );
+};
 
 export const getBlockByNumber = (
   shardID: ShardID,
-  num: BlockNumber | 'latest',
+  num: BlockNumber | "latest",
   isFullInfo = true
 ): Promise<Block> => {
-  return transport(shardID, 'eth_getBlockByNumber', [num, isFullInfo]).then(mapBlockFromResponse)
-}
+  return transport(shardID, "eth_getBlockByNumber", [num, isFullInfo]).then(
+    mapBlockFromResponse
+  );
+};
 
 export const getTransactionByHash = (
   shardID: ShardID,
   hash: TransactionHash
 ): Promise<RPCTransactionAstra> => {
-  return transport(shardID, 'eth_getTransactionByHash', [hash])
-}
+  return transport(shardID, "eth_getTransactionByHash", [hash]);
+};
 
 export const getLogs = (
   shardID: ShardID,
@@ -64,39 +72,42 @@ export const getLogs = (
   const o = {
     topics,
     address,
-    fromBlock: '0x' + fromBlock.toString(16),
-    toBlock: '0x' + toBlock.toString(16),
-  }
-  return transport(shardID, 'eth_getLogs', [o])
-}
+    fromBlock: "0x" + fromBlock.toString(16),
+    toBlock: "0x" + toBlock.toString(16),
+  };
+  return transport(shardID, "eth_getLogs", [o]);
+};
 
-export const getBalance = (shardID: ShardID, address: Address): Promise<TransactionReceipt> => {
-  return transport(shardID, 'astra_getBalance', [address, 'latest'])
-}
+export const getBalance = (
+  shardID: ShardID,
+  address: Address
+): Promise<TransactionReceipt> => {
+  return transport(shardID, "astra_getBalance", [address, "latest"]);
+};
 
-type transactionCountType = 'ALL' | 'RECEIVED' | 'SENT'
+type transactionCountType = "ALL" | "RECEIVED" | "SENT";
 export const getTransactionCount = (
   shardID: ShardID,
   address: Address,
-  type: transactionCountType = 'ALL'
+  type: transactionCountType = "ALL"
 ): Promise<TransactionReceipt> => {
-  return transport(shardID, 'astrav2_getTransactionsCount', [address, type])
-}
+  return transport(shardID, "astrav2_getTransactionsCount", [address, type]);
+};
 
 export const getTransactionReceipt = (
   shardID: ShardID,
   hash: TransactionHash
 ): Promise<TransactionReceipt> => {
-  return transport(shardID, 'astrav2_getTransactionReceipt', [hash])
-}
+  return transport(shardID, "astrav2_getTransactionReceipt", [hash]);
+};
 
 export const getTransactionTrace = (
   shardID: ShardID,
   hash: TransactionHash,
-  tracer: 'callTracer' = 'callTracer'
+  tracer: "callTracer" = "callTracer"
 ): Promise<InternalTransaction> => {
-  return transport(shardID, 'debug_traceTransaction', [hash, {tracer}])
-}
+  return transport(shardID, "debug_traceTransaction", [hash, { tracer }]);
+};
 
 // these blocks always fails
 export const traceBlock = (
@@ -104,41 +115,44 @@ export const traceBlock = (
   blockNumber: BlockNumber
 ): Promise<InternalTransaction[]> => {
   if (config.indexer.chainID === mainnetChainID) {
-    return Promise.resolve([])
+    return Promise.resolve([]);
   }
 
-  const hex = '0x' + blockNumber.toString(16)
-  return transport(shardID, 'trace_block', [hex]).then((txs) =>
+  const hex = "0x" + blockNumber.toString(16);
+  return transport(shardID, "trace_block", [hex]).then((txs) =>
     txs
       ? txs
           .map(mapInternalTransactionFromBlockTrace(blockNumber))
           // filter out suicide type as we don't need them
-          .filter((t: InternalTransaction) => t.type !== 'suicide')
+          .filter((t: InternalTransaction) => t.type !== "suicide")
       : []
-  )
-}
+  );
+};
 
 // testnet ID 1666700000
 export const getChainID = (shardID: ShardID): Promise<number> => {
-  return transport(shardID, 'eth_chainId', []).then((r) => parseInt(r, 16))
-}
+  return transport(shardID, "eth_chainId", []).then((r) => parseInt(r, 16));
+};
 
-export const getCode = (shardID: ShardID, address: Address): Promise<number> => {
-  return transport(shardID, 'eth_getCode', [address, 'latest'])
-}
+export const getCode = (
+  shardID: ShardID,
+  address: Address
+): Promise<number> => {
+  return transport(shardID, "eth_getCode", [address, "latest"]);
+};
 
 type Call = {
-  to: Address
-  from?: Address
-  gas?: string
-  gasPrice?: string
-  data: string
-  value?: string
-}
+  to: Address;
+  from?: Address;
+  gas?: string;
+  gasPrice?: string;
+  data: string;
+  value?: string;
+};
 export const call = (
   shardID: ShardID,
   params: Call,
-  blockNumber: BlockNumber | 'latest' | 'earliest' | 'pending' = 'latest'
+  blockNumber: BlockNumber | "latest" | "earliest" | "pending" = "latest"
 ): Promise<ByteCode> => {
-  return transport(shardID, 'astra_call', [params, blockNumber])
-}
+  return transport(shardID, "astra_call", [params, blockNumber]);
+};

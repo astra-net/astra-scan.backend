@@ -1,1 +1,1 @@
-export const mainnetChainID = 1666600000
+export const mainnetChainID = 1666600000;

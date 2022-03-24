@@ -1,29 +1,29 @@
-import * as RPCClient from 'src/indexer/rpc/client'
-import {logger} from 'src/logger'
+import * as RPCClient from "src/indexer/rpc/client";
+import { logger } from "src/logger";
 import {
   Address,
   Block,
   InternalTransaction,
   RPCStakingTransactionAstra,
   RPCTransaction,
-} from 'src/types'
-import {normalizeAddress} from 'src/utils/normalizeAddress'
+} from "src/types";
+import { normalizeAddress } from "src/utils/normalizeAddress";
 
-const l = logger(module)
+const l = logger(module);
 
-const undelegateThresholdONE = 100000n * 10n ** 18n
-const transferThresholdONE = 10000n * 10n ** 18n
-const balanceThresholdONE = 1000000n * 10n ** 18n
+const undelegateThresholdONE = 100000n * 10n ** 18n;
+const transferThresholdONE = 10000n * 10n ** 18n;
+const balanceThresholdONE = 1000000n * 10n ** 18n;
 
-const maxTransactionCount = 1
+const maxTransactionCount = 1;
 
-const maxEntries = 500
+const maxEntries = 500;
 // todo
-const maxExcludedEntries = 0
+const maxExcludedEntries = 0;
 
-const entries = new Map()
-const excludedAddresses = new Set()
-type TType = 'staking' | 'internal' | 'transaction'
+const entries = new Map();
+const excludedAddresses = new Set();
+type TType = "staking" | "internal" | "transaction";
 
 const addAddress = async (
   address: Address,
@@ -33,18 +33,18 @@ const addAddress = async (
   transactionHash: string
 ) => {
   if (excludedAddresses.has(address) || entries.has(address)) {
-    return
+    return;
   }
 
-  const balance = await RPCClient.getBalance(0, address)
+  const balance = await RPCClient.getBalance(0, address);
   if (BigInt(String(balance)) < balanceThresholdONE) {
-    return
+    return;
   }
 
-  const sentTxCount = await RPCClient.getTransactionCount(0, address, 'SENT')
+  const sentTxCount = await RPCClient.getTransactionCount(0, address, "SENT");
   if (+sentTxCount > maxTransactionCount) {
-    excludedAddresses.add(address)
-    return
+    excludedAddresses.add(address);
+    return;
   }
 
   const payload = {
@@ -54,77 +54,100 @@ const addAddress = async (
     transactionHash,
     balance: BigInt(String(balance)).toString(),
     sentTxCount,
-  }
+  };
 
-  entries.set(address, payload)
-  removeOldEntries()
-}
+  entries.set(address, payload);
+  removeOldEntries();
+};
 
-export const addInternalTransaction = (internalTransaction: InternalTransaction, block: Block) => {
+export const addInternalTransaction = (
+  internalTransaction: InternalTransaction,
+  block: Block
+) => {
   try {
-    const value = internalTransaction.value
+    const value = internalTransaction.value;
     if (BigInt(value) < transferThresholdONE) {
-      return
+      return;
     }
 
-    const address = internalTransaction.to
-    addAddress(address, value, 'internal', +block.number, internalTransaction.transactionHash)
+    const address = internalTransaction.to;
+    addAddress(
+      address,
+      value,
+      "internal",
+      +block.number,
+      internalTransaction.transactionHash
+    );
   } catch (err: any) {
-    l.error(err)
+    l.error(err);
   }
-}
+};
 
 export const addTransaction = (transaction: RPCTransaction) => {
   try {
-    const value = transaction.value
+    const value = transaction.value;
     if (BigInt(value) < transferThresholdONE) {
-      return
+      return;
     }
 
-    const address = transaction.to
-    addAddress(address, value, 'transaction', +transaction.blockNumber, transaction.hash)
+    const address = transaction.to;
+    addAddress(
+      address,
+      value,
+      "transaction",
+      +transaction.blockNumber,
+      transaction.hash
+    );
   } catch (err: any) {
-    l.error(err)
+    l.error(err);
   }
-}
+};
 
-export const addStakingTransaction = (stakingTransaction: RPCStakingTransactionAstra) => {
+export const addStakingTransaction = (
+  stakingTransaction: RPCStakingTransactionAstra
+) => {
   try {
-    if (stakingTransaction.type !== 'Undelegate') {
-      return
+    if (stakingTransaction.type !== "Undelegate") {
+      return;
     }
 
-    const value = stakingTransaction.msg.amount
+    const value = stakingTransaction.msg.amount;
 
     if (BigInt(value) < undelegateThresholdONE) {
-      return
+      return;
     }
 
-    const address = normalizeAddress(stakingTransaction.msg.delegatorAddress)
-    addAddress(address!, value, 'staking', +stakingTransaction.blockNumber, stakingTransaction.hash)
+    const address = normalizeAddress(stakingTransaction.msg.delegatorAddress);
+    addAddress(
+      address!,
+      value,
+      "staking",
+      +stakingTransaction.blockNumber,
+      stakingTransaction.hash
+    );
   } catch (err: any) {
-    l.error(err)
+    l.error(err);
   }
-}
+};
 
 export const getEntries = () =>
-  Array.from(entries.values()).sort((a, b) => b.blockNumber - a.blockNumber)
+  Array.from(entries.values()).sort((a, b) => b.blockNumber - a.blockNumber);
 
 const removeOldEntries = () => {
   if (entries.size < maxEntries) {
-    return
+    return;
   }
 
-  const limit = entries.size - maxEntries
+  const limit = entries.size - maxEntries;
 
-  let i = 0
+  let i = 0;
   for (const k of entries.keys()) {
     if (i++ > limit) {
-      break
+      break;
     }
-    entries.delete(k)
+    entries.delete(k);
   }
-}
+};
 
 /*
 

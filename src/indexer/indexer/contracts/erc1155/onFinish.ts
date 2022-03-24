@@ -1,39 +1,39 @@
-import { ABI } from 'src/indexer/indexer/contracts/erc1155/ABI';
-import { getByIPFSHash } from 'src/indexer/utils/ipfs/index';
-import { logger } from 'src/logger';
-import { PostgresStorage } from 'src/store/postgres';
-import { Address, Filter, IERC721TokenID } from 'src/types';
+import { ABI } from "src/indexer/indexer/contracts/erc1155/ABI";
+import { getByIPFSHash } from "src/indexer/utils/ipfs/index";
+import { logger } from "src/logger";
+import { PostgresStorage } from "src/store/postgres";
+import { Address, Filter, IERC721TokenID } from "src/types";
 
-const l = logger(module, 'erc1155:assets')
-const {call} = ABI
+const l = logger(module, "erc1155:assets");
+const { call } = ABI;
 
 const filter: Filter = {
   limit: 10,
   offset: 0,
   filters: [
     {
-      property: 'needUpdate',
-      type: 'eq',
-      value: 'true',
+      property: "needUpdate",
+      type: "eq",
+      value: "true",
     },
   ],
-}
+};
 // update balances
 export const updateAssets = async (store: PostgresStorage) => {
-  l.info(`Updating assets`)
-  let count = 0
-  const tokensForUpdate = new Set<Address>()
+  l.info(`Updating assets`);
+  let count = 0;
+  const tokensForUpdate = new Set<Address>();
 
   // since we update entries, iterator doesnt work
   while (true) {
-    const assetsNeedUpdate = await store.erc1155.getAssets(filter)
+    const assetsNeedUpdate = await store.erc1155.getAssets(filter);
     if (!assetsNeedUpdate.length) {
-      break
+      break;
     }
-    l.info(`Updating ${assetsNeedUpdate.length} assets`)
+    l.info(`Updating ${assetsNeedUpdate.length} assets`);
 
     const promises = assetsNeedUpdate.map(
-      async ({meta: metaData, tokenAddress, tokenID, tokenURI = ''}) => {
+      async ({ meta: metaData, tokenAddress, tokenID, tokenURI = "" }) => {
         // todo dont fetch meta if already there
         // @ts-ignore
         if (metaData && metaData.name) {
@@ -43,34 +43,41 @@ export const updateAssets = async (store: PostgresStorage) => {
             tokenURI,
             metaData,
             tokenID as IERC721TokenID
-          )
-          return
+          );
+          return;
         }
 
-        tokensForUpdate.add(tokenAddress)
+        tokensForUpdate.add(tokenAddress);
 
-        const uri = await call('uri', [tokenID], tokenAddress)
-        let meta = {} as any
+        const uri = await call("uri", [tokenID], tokenAddress);
+        let meta = {} as any;
 
         try {
           // todo validate size
-          meta = await getByIPFSHash(uri)
+          meta = await getByIPFSHash(uri);
         } catch (e: any) {
-          l.debug(`Failed to fetch meta from ${uri} for token ${tokenAddress} ${tokenID}`)
+          l.debug(
+            `Failed to fetch meta from ${uri} for token ${tokenAddress} ${tokenID}`
+          );
         }
 
-        await store.erc1155.updateAsset(tokenAddress, uri, meta, tokenID as IERC721TokenID)
+        await store.erc1155.updateAsset(
+          tokenAddress,
+          uri,
+          meta,
+          tokenID as IERC721TokenID
+        );
       }
-    )
-    await Promise.all(promises)
-    count += assetsNeedUpdate.length
+    );
+    await Promise.all(promises);
+    count += assetsNeedUpdate.length;
   }
 
   const promises = [...tokensForUpdate.values()].map(async (token) => {
-    const holders = await store.erc1155.getHoldersCount(token)
+    const holders = await store.erc1155.getHoldersCount(token);
 
     // todo total supply
-    const totalSupply = 0 // await call('totalSupply', [], token)
+    const totalSupply = 0; // await call('totalSupply', [], token)
     // todo tx count ?
 
     const erc1155 = {
@@ -78,48 +85,54 @@ export const updateAssets = async (store: PostgresStorage) => {
       totalSupply: totalSupply,
       transactionCount: 0,
       address: token,
-    }
+    };
 
     // @ts-ignore
-    return store.erc1155.updateERC1155(erc1155)
-  })
+    return store.erc1155.updateERC1155(erc1155);
+  });
 
-  await Promise.all(promises)
+  await Promise.all(promises);
 
-  l.info(`Updated ${count} assets`)
-}
+  l.info(`Updated ${count} assets`);
+};
 
 export const updateBalances = async (store: PostgresStorage) => {
-  l.info(`Updating balances`)
-  const tokensForUpdate = new Set<Address>()
-  let count = 0
+  l.info(`Updating balances`);
+  const tokensForUpdate = new Set<Address>();
+  let count = 0;
   // since we update entries, iterator doesnt work
   while (true) {
-    const assetsNeedUpdate = await store.erc1155.getBalances(filter)
+    const assetsNeedUpdate = await store.erc1155.getBalances(filter);
     if (!assetsNeedUpdate.length) {
-      break
+      break;
     }
 
     // can be optimized if call a batch
-    const promises = assetsNeedUpdate.map(async ({tokenAddress, tokenID, ownerAddress}) => {
-      tokensForUpdate.add(tokenAddress)
+    const promises = assetsNeedUpdate.map(
+      async ({ tokenAddress, tokenID, ownerAddress }) => {
+        tokensForUpdate.add(tokenAddress);
 
-      const [balance] = await call('balanceOfBatch', [[ownerAddress], [tokenID]], tokenAddress)
-      count++
-      return store.erc1155.updateBalance(
-        tokenAddress,
-        ownerAddress,
-        tokenID as IERC721TokenID,
-        balance
-      )
-    })
-    await Promise.all(promises)
+        const [balance] = await call(
+          "balanceOfBatch",
+          [[ownerAddress], [tokenID]],
+          tokenAddress
+        );
+        count++;
+        return store.erc1155.updateBalance(
+          tokenAddress,
+          ownerAddress,
+          tokenID as IERC721TokenID,
+          balance
+        );
+      }
+    );
+    await Promise.all(promises);
   }
 
-  l.info(`Updated ${count} balances`)
-}
+  l.info(`Updated ${count} balances`);
+};
 
 export const onFinish = async (store: PostgresStorage) => {
-  await updateAssets(store)
-  await updateBalances(store)
-}
+  await updateAssets(store);
+  await updateBalances(store);
+};

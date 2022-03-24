@@ -1,20 +1,25 @@
-import {IStorageInternalTransaction} from 'src/store/interface'
+import { IStorageInternalTransaction } from "src/store/interface";
 import {
   TransactionQueryValue,
   InternalTransactionQueryField,
   Filter,
   InternalTransaction,
-} from 'src/types'
+} from "src/types";
 
-import {Query} from 'src/store/postgres/types'
-import {fromSnakeToCamelResponse, generateQuery} from 'src/store/postgres/queryMapper'
-import {buildSQLQuery} from 'src/store/postgres/filters'
+import { Query } from "src/store/postgres/types";
+import {
+  fromSnakeToCamelResponse,
+  generateQuery,
+} from "src/store/postgres/queryMapper";
+import { buildSQLQuery } from "src/store/postgres/filters";
 
-export class PostgresStorageInternalTransaction implements IStorageInternalTransaction {
-  query: Query
+export class PostgresStorageInternalTransaction
+  implements IStorageInternalTransaction
+{
+  query: Query;
 
   constructor(query: Query) {
-    this.query = query
+    this.query = query;
   }
 
   addInternalTransaction = async (tx: InternalTransaction) => {
@@ -25,29 +30,37 @@ export class PostgresStorageInternalTransaction implements IStorageInternalTrans
       value: BigInt(tx.value).toString(),
       gas: BigInt(tx.gas).toString(),
       gasUsed: BigInt(tx.gasUsed).toString(),
-    }
+    };
 
-    const {query, params} = generateQuery(newTx)
+    const { query, params } = generateQuery(newTx);
     return await this.query(
       `insert into internal_transactions ${query} on conflict (transaction_hash, index) do nothing;`,
       params
-    )
-  }
+    );
+  };
 
   getInternalTransactionsByField = async (
     field: InternalTransactionQueryField,
     value: TransactionQueryValue
   ): Promise<InternalTransaction[]> => {
-    const res = await this.query(`select * from internal_transactions where ${field}=$1;`, [value])
-    return res.map(fromSnakeToCamelResponse)
-  }
+    const res = await this.query(
+      `select * from internal_transactions where ${field}=$1;`,
+      [value]
+    );
+    return res.map(fromSnakeToCamelResponse);
+  };
 
-  getInternalTransactions = async (filter: Filter): Promise<InternalTransaction[]> => {
-    const q = buildSQLQuery(filter)
-    const res = await this.query(`select * from internal_transactions ${q}`, [])
+  getInternalTransactions = async (
+    filter: Filter
+  ): Promise<InternalTransaction[]> => {
+    const q = buildSQLQuery(filter);
+    const res = await this.query(
+      `select * from internal_transactions ${q}`,
+      []
+    );
 
-    return res.map(fromSnakeToCamelResponse)
-  }
+    return res.map(fromSnakeToCamelResponse);
+  };
 }
 
 // todo search by input sig

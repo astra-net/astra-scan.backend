@@ -1,9 +1,9 @@
-import {Client} from 'rpc-websockets'
-import {logger} from 'src/logger'
-import LoggerModule from 'zerg/dist/LoggerModule'
-import {RPCUrls, urls} from '../../RPCUrls'
-import {ShardID} from 'src/types/blockchain'
-import {RPCErrorPrefix} from 'src/indexer/rpc/transport/constants'
+import { Client } from 'rpc-websockets';
+import { RPCErrorPrefix } from 'src/indexer/rpc/transport/constants';
+import { logger } from 'src/logger';
+import { ShardID } from 'src/types/blockchain';
+import LoggerModule from 'zerg/dist/LoggerModule';
+import { urls } from '../../RPCUrls';
 const callTimeout = 40000
 const defaultRetries = 3
 

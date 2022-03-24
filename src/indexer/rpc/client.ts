@@ -1,5 +1,5 @@
-import {config} from 'src/config'
-import {mainnetChainID} from 'src/constants'
+import { config } from 'src/config';
+import { mainnetChainID } from 'src/constants';
 import {
   Address,
   Block,
@@ -11,10 +11,10 @@ import {
   ShardID,
   Topic,
   TransactionHash,
-  TransactionReceipt,
-} from 'types/blockchain'
-import {mapBlockFromResponse, mapInternalTransactionFromBlockTrace} from './mappers'
-import {transport} from './transport'
+  TransactionReceipt
+} from 'types/blockchain';
+import { mapBlockFromResponse, mapInternalTransactionFromBlockTrace } from './mappers';
+import { transport } from './transport';
 
 // todo remove shard ID
 export const getBlocks = (
@@ -99,12 +99,11 @@ export const getTransactionTrace = (
 }
 
 // these blocks always fails
-const corruptedTraceBlocks = [4864036, 8027779]
 export const traceBlock = (
   shardID: ShardID,
   blockNumber: BlockNumber
 ): Promise<InternalTransaction[]> => {
-  if (config.indexer.chainID === mainnetChainID && corruptedTraceBlocks.includes(blockNumber)) {
+  if (config.indexer.chainID === mainnetChainID) {
     return Promise.resolve([])
   }
 

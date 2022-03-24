@@ -1,16 +1,12 @@
-import {logger} from 'src/logger'
-import {IStorageContract} from 'src/store/interface'
+import { IStorageContract } from 'src/store/interface';
+import { buildSQLQuery } from 'src/store/postgres/filters';
+import { fromSnakeToCamelResponse, generateQuery } from 'src/store/postgres/queryMapper';
+import { Query } from 'src/store/postgres/types';
 import {
-  Contract,
-  Filter,
-  Transaction,
-  ContractQueryField,
-  ContractQueryValue,
-  ContractEvent,
-} from 'src/types'
-import {Query} from 'src/store/postgres/types'
-import {fromSnakeToCamelResponse, generateQuery} from 'src/store/postgres/queryMapper'
-import {buildSQLQuery} from 'src/store/postgres/filters'
+  Contract, ContractEvent, ContractQueryField,
+  ContractQueryValue, Filter,
+  Transaction
+} from 'src/types';
 
 export class PostgresStorageContract implements IStorageContract {
   query: Query
@@ -21,6 +17,7 @@ export class PostgresStorageContract implements IStorageContract {
 
   addContract = async (contract: Contract) => {
     const {query, params} = generateQuery(contract)
+    console.log("New Contract at block: ", params[3])
     return await this.query(
       `insert into contracts ${query} on conflict (address) do nothing;`,
       params

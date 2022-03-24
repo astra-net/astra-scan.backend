@@ -1,7 +1,7 @@
-import {HTTPTransport} from './http/fetch'
-import {WSTransport} from './ws'
-import {config} from 'src/config'
-import {logger} from 'src/logger'
+import { config } from 'src/config';
+import { logger } from 'src/logger';
+import { HTTPTransport } from './http/fetch';
+import { WSTransport } from './ws';
 
 const l = logger(module)
 

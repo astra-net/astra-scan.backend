@@ -45,12 +45,12 @@ export class BlockIndexer {
 
   increaseBatchCount = () => {
     this.batchCount = Math.min(Math.ceil(this.batchCount * 1.1), maxBatchCount)
-    this.l.debug(`Batch increased to ${this.batchCount}`)
+//    this.l.debug(`Batch increased to ${this.batchCount}`)
   }
 
   decreaseBatchCount = () => {
     this.batchCount = Math.max(~~(this.batchCount * 0.9), 1)
-    this.l.debug(`Batch decreased to ${this.batchCount}`)
+ //   this.l.debug(`Batch decreased to ${this.batchCount}`)
   }
 
   loop = async () => {
@@ -205,7 +205,7 @@ export class BlockIndexer {
             return Promise.resolve([] as Block[])
           }
 
-          this.l.debug(`Processing [${from}, ${to}] ${to - from + 1} blocks...`)
+          // this.l.debug(`Processing [${from}, ${to}] ${to - from + 1} blocks...`)
 
           return await getBlocks(from, to)
             .then(addBlocks)
@@ -238,11 +238,11 @@ export class BlockIndexer {
         await store.indexer.setLastIndexedBlockNumber(lastFetchedBlockNumber)
       }
 
-      this.l.info(
-        `Processed [${startBlock}, ${syncedToBlock}] ${
-          blocks.length
-        } blocks. ${transactionsCount} txs. ${stakingTransactionsCount} staking txs. Done in ${batchTime()}. Failed requests ${failedCount}`
-      )
+      // this.l.info(
+      //   `Processed [${startBlock}, ${syncedToBlock}] ${
+      //     blocks.length
+      //   } blocks. ${transactionsCount} txs. ${stakingTransactionsCount} staking txs. Done in ${batchTime()}. Failed requests ${failedCount}`
+      // )
 
       const u = urls[shardID]
       this.l.debug('RPC queries', {

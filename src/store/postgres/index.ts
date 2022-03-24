@@ -91,7 +91,14 @@ export class PostgresStorage implements IStorage {
     this.l.info(`postgres://${p.user}@${p.host}:${p.port}/${p.database} starting...`)
 
     this.isStarting = true
-    // await this.migrate()
+    // only create the schema if the database is empty
+    const e = await this.db.query(
+      "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'contracts');"
+    )
+    if (!e.rows[0].exists) {
+      this.l.info('Migrating')
+      await this.migrate()
+    }
     this.isStarted = true
     this.isStarting = false
     this.l.info('Done')

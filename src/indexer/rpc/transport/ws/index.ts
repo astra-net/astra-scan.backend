@@ -1,7 +1,7 @@
-import {config} from 'src/config'
-import {RPCUrls} from 'src/indexer/rpc/RPCUrls'
-import {RPCAstraMethod, RPCETHMethod, ShardID} from 'src/types/blockchain'
-import {WebSocketRPC} from './WebSocketRPC'
+import { config } from 'src/config';
+import { RPCUrls } from 'src/indexer/rpc/RPCUrls';
+import { RPCAstraMethod, RPCETHMethod, ShardID } from 'src/types/blockchain';
+import { WebSocketRPC } from './WebSocketRPC';
 
 const lazyConnection = (shardID: ShardID, url: string) => {
   let connection: WebSocketRPC | null = null

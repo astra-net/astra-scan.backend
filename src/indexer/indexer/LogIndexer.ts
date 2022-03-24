@@ -1,13 +1,12 @@
-import {config} from 'src/config'
-import * as RPCClient from 'src/indexer/rpc/client'
-import {urls, RPCUrls} from 'src/indexer/rpc/RPCUrls'
-import {ShardID, Log} from 'src/types/blockchain'
+import * as RPCClient from 'src/indexer/rpc/client';
+import { RPCUrls } from 'src/indexer/rpc/RPCUrls';
+import { logger } from 'src/logger';
+import { stores } from 'src/store';
+import { PostgresStorage } from 'src/store/postgres';
+import { Log, ShardID } from 'src/types/blockchain';
+import { logTime } from 'src/utils/logTime';
+import LoggerModule from 'zerg/dist/LoggerModule';
 
-import {logger} from 'src/logger'
-import LoggerModule from 'zerg/dist/LoggerModule'
-import {stores} from 'src/store'
-import {logTime} from 'src/utils/logTime'
-import {PostgresStorage} from 'src/store/postgres'
 
 const approximateBlockMintingTime = 2000
 const blockRange = 10
@@ -35,12 +34,12 @@ export class LogIndexer {
 
   increaseBatchCount = () => {
     this.batchCount = Math.min(Math.ceil(this.batchCount * 1.1), maxBatchCount)
-    this.l.debug(`Batch increased to ${this.batchCount}`)
+    // this.l.debug(`Batch increased to ${this.batchCount}`)
   }
 
   decreaseBatchCount = () => {
     this.batchCount = Math.max(~~(this.batchCount * 0.9), 1)
-    this.l.debug(`Batch decreased to ${this.batchCount}`)
+    // this.l.debug(`Batch decreased to ${this.batchCount}`)
   }
 
   loop = async () => {
@@ -85,12 +84,12 @@ export class LogIndexer {
         startBlock + blockRange * this.batchCount
       )
 
-      this.l.info(
-        `Processed [${startBlock},${syncedToBlock}] ${Math.max(
-          syncedToBlock - startBlock,
-          1
-        )} blocks. ${logsLength} log entries. Done in ${batchTime()}.`
-      )
+      // this.l.info(
+      //   `Processed [${startBlock},${syncedToBlock}] ${Math.max(
+      //     syncedToBlock - startBlock,
+      //     1
+      //   )} blocks. ${logsLength} log entries. Done in ${batchTime()}.`
+      // )
 
       await store.indexer.setLastIndexedLogsBlockNumber(syncedToBlock)
 

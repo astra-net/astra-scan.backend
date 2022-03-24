@@ -1,6 +1,6 @@
-import {InternalTransaction, Contract, ByteCode} from 'src/types'
-import {logger} from 'src/logger'
-import base58 from 'bs58'
+import base58 from 'bs58';
+import { logger } from 'src/logger';
+import { ByteCode, Contract, InternalTransaction } from 'src/types';
 const l = logger(module)
 
 export const contractAddressIndexer = (tx: InternalTransaction) => {

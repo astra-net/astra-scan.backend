@@ -1,13 +1,8 @@
+import { FilterEntry, FilterOrderBy } from 'src/types';
 import {
-  isHexString,
-  isLength,
-  isUint,
-  isShardAvailable,
-  CurryParamValidator,
-  ParamValidator,
-  isOneOf as isOneOfValidator,
-} from './validators'
-import {Filter, FilterEntry, FilterOrderBy} from 'src/types'
+  CurryParamValidator, isHexString,
+  isLength, isOneOf as isOneOfValidator, isShardAvailable, isUint, ParamValidator
+} from './validators';
 
 export const isShard: CurryParamValidator = (value: number) => () => [
   isUint(value, {min: 0, max: 3}),

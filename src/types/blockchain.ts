@@ -350,7 +350,7 @@ export type IERC1155 = {
   meta?: any;
   /*
    meta: {
-    name: 'ROTTENSWAP ONE DROP',
+    name: 'ROTTENSWAP ASTRA DROP',
     type: '1155',
     symbol: 'VINCI',
     description: 'The most based drop to ever exist on Astra.',

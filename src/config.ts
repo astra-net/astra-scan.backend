@@ -46,7 +46,7 @@ const getCommaSeparatedList = (list: string | undefined): string[] =>
 
 const getChainID = (v: any): number => {
   if (v === "mainnet") {
-    return 1666600000;
+    return 2730;
   }
   return +v;
 };
@@ -67,7 +67,7 @@ export const config = {
     cacheMaxSize: +(process.env.API_CACHE_MAX_SIZE || 1000 * 100),
     ws: {
       isEnabled: toBool(process.env.API_WS_IS_ENABLED || "0"),
-      port: 3001,
+      port: 3005,
       isDemoHTMLPageEnabled: true,
     },
     rest: {

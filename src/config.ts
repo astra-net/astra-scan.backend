@@ -48,6 +48,9 @@ const getChainID = (v: any): number => {
   if (v === "mainnet") {
     return 2730;
   }
+  if (v === "testnet") {
+	  return 2731;
+  }
   return +v;
 };
 

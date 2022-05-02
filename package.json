@@ -1,5 +1,5 @@
 {
-  "name": "harmony-explorer-2021",
+  "name": "astra-scan-backend",
   "version": "0.1.1",
   "main": "src/index.ts",
   "license": "ISC",
@@ -40,7 +40,7 @@
     "pg": "^8.5.1",
     "qs": "^6.9.1",
     "rpc-websockets": "^7.4.11",
-    "socket.io": "^4.0.1",
+    "socket.io": "^4.4.1",
     "twilio": "^3.48.1",
     "typescript": "^4.2.4",
     "web-push": "^3.4.4",

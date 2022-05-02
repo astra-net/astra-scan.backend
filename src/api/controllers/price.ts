@@ -10,7 +10,7 @@ const timeout = () =>
 const call = (url: string) => nodeFetch(url).then((r) => r.json());
 
 const pairs = [
-  "ONEUSDT",
+  "ASTRAUSDT",
   "BUSDUSDT",
   "ETHUSDT",
   "LINKUSDT",
@@ -56,7 +56,7 @@ const pairs = [
   "SMCUSDT",
   "VIUSDT",
   "YFLUSDT",
-  "1ONEUSDT",
+  "1ASTRAUSDT",
   "ARCDUSDT",
   "UNISTAKEUSDT",
   "COMBOUSDT",
@@ -69,7 +69,7 @@ const pairs = [
   "SRKUSDT",
   "LINAUSDT",
   "DEXEUSDT",
-  "ONEUSDT",
+  "ASTRAUSDT",
   "BADGERUSDT",
   "SXPUSDT",
   "SNXUSDT",
@@ -128,7 +128,7 @@ const pairs = [
   "NVGUSDT",
   "WBNBUSDT",
   "ElonGateUSDT",
-  "ONEUSDT",
+  "ASTRAUSDT",
   "AAVEUSDT",
   "BUSDUSDT",
   "YFIUSDT",

@@ -11,9 +11,9 @@ import { normalizeAddress } from "src/utils/normalizeAddress";
 
 const l = logger(module);
 
-const undelegateThresholdONE = 100000n * 10n ** 18n;
-const transferThresholdONE = 10000n * 10n ** 18n;
-const balanceThresholdONE = 1000000n * 10n ** 18n;
+const undelegateThresholdASTRA = 100000n * 10n ** 18n;
+const transferThresholdASTRA = 10000n * 10n ** 18n;
+const balanceThresholdASTRA = 1000000n * 10n ** 18n;
 
 const maxTransactionCount = 1;
 
@@ -37,7 +37,7 @@ const addAddress = async (
   }
 
   const balance = await RPCClient.getBalance(0, address);
-  if (BigInt(String(balance)) < balanceThresholdONE) {
+  if (BigInt(String(balance)) < balanceThresholdASTRA) {
     return;
   }
 
@@ -66,7 +66,7 @@ export const addInternalTransaction = (
 ) => {
   try {
     const value = internalTransaction.value;
-    if (BigInt(value) < transferThresholdONE) {
+    if (BigInt(value) < transferThresholdASTRA) {
       return;
     }
 
@@ -86,7 +86,7 @@ export const addInternalTransaction = (
 export const addTransaction = (transaction: RPCTransaction) => {
   try {
     const value = transaction.value;
-    if (BigInt(value) < transferThresholdONE) {
+    if (BigInt(value) < transferThresholdASTRA) {
       return;
     }
 
@@ -113,7 +113,7 @@ export const addStakingTransaction = (
 
     const value = stakingTransaction.msg.amount;
 
-    if (BigInt(value) < undelegateThresholdONE) {
+    if (BigInt(value) < undelegateThresholdASTRA) {
       return;
     }
 

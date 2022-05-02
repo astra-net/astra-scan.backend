@@ -23,7 +23,7 @@ export async function oneWalletGetMetrics(): Promise<any> {
   };
 }
 
-const RPCURL = "https://api.s0.t.hmny.io";
+const RPCURL = "https://rpc.s0.t.astranetwork.com";
 const getTotalAmount = async (addressList: Address[]) => {
   const fetchBalance = async (
     address: Address,
